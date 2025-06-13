@@ -11,9 +11,16 @@ static_folder_path = os.path.abspath(os.path.join(os.path.dirname(__file__), '..
 app = Flask(__name__, static_folder=static_folder_path, static_url_path='/static')
 app.secret_key = 'another-secret-key-for-admin-app-change-me' 
 
+# --- Hardcoded Tailwind-derived Colors (Python constants for clarity, but used directly in _class) ---
+PUP_BURGUNDY = '#722F37'
+PUP_GOLD = '#FFD700'
+PUP_DARK_BURGUNDY = '#5A252A' # Used for hover state
+TAILWIND_RED_800 = 'text-red-800'
+TAILWIND_RED_900_HOVER = 'hover:bg-red-900'
+
+
 # --- CSS Stylesheets (NOW INLINED DIRECTLY IN HTML) ---
-# This string will contain ALL the CSS.
-# User MUST populate this with content from Tailwind and Font Awesome CDNs.
+# This string will contain ALL the CSS for the admin app.
 FULL_INLINE_CSS_ADMIN = """
 /*
    -- User Action Required --
@@ -37,6 +44,8 @@ FULL_INLINE_CSS_ADMIN = """
     --pup-burgundy: #722F37;
     --pup-gold: #FFD700;
     --pup-dark-burgundy: #5A252A;
+    --pup-red-500: #EF4444;
+    --pup-red-600: #DC2626;
     --pup-red-800: #991B1B;
     --pup-red-900: #7F1D1D;
 }
@@ -48,7 +57,9 @@ FULL_INLINE_CSS_ADMIN = """
 
 /* Tailwind-like classes for specific colors used in example, now defined in custom CSS */
 .text-red-800 { color: var(--pup-red-800); }
-.hover\\:bg-red-900:hover { background-color: var(--pup-red-900); } /* Escaped colon */
+.hover\\:bg-red-900:hover { background-color: var(--pup-red-900); }
+.bg-red-500 { background-color: var(--pup-red-500); }
+.hover\\:bg-red-600:hover { background-color: var(--pup-red-600); }
 
 /* General Tailwind-like classes for consistency */
 .flex { display: flex; }
@@ -64,10 +75,10 @@ FULL_INLINE_CSS_ADMIN = """
 .rounded-full { border-radius: 9999px; }
 .text-xl { font-size: 1.25rem; line-height: 1.75rem; }
 .font-bold { font-weight: 700; }
-.hover\\:text-gray-200:hover { color: #E5E7EB; } /* Escaped colon */
+.hover\\:text-gray-200:hover { color: #E5E7EB; }
 .mx-2 { margin-left: 0.5rem; margin-right: 0.5rem; }
-.container { width: 100%; } /* Max-width handled by default Tailwind */
-.max-w-4xl { max-width: 56rem; } /* Tailwind max-w-4xl */
+.container { width: 100%; }
+.max-w-4xl { max-width: 56rem; }
 .text-2xl { font-size: 1.5rem; line-height: 2rem; }
 .mb-4 { margin-bottom: 1rem; }
 .bg-white { background-color: #fff; }
@@ -85,16 +96,14 @@ FULL_INLINE_CSS_ADMIN = """
 .border { border-width: 1px; }
 .border-gray-300 { border-color: #D1D5DB; }
 .focus\\:outline-none:focus { outline: 2px solid transparent; outline-offset: 2px; }
-.focus\\:border-blue-500:focus { border-color: #3B82F6; } /* Tailwind blue-500 */
+.focus\\:border-blue-500:focus { border-color: #3B82F6; }
 .flex-wrap { flex-wrap: wrap; }
 .justify-center { justify-content: center; }
 .gap-4 { gap: 1rem; }
 .py-3 { padding-top: 0.75rem; padding-bottom: 0.75rem; }
-.min-w-\\[120px\\] { min-width: 120px; } /* Arbitrary value, Tkhtml may not support */
+.min-w-\\[120px\\] { min-width: 120px; }
 .bg-blue-500 { background-color: #3B82F6; }
 .hover\\:bg-blue-600:hover { background-color: #2563EB; }
-.bg-red-500 { background-color: var(--pup-red-500); }
-.hover\\:bg-red-600:hover { background-color: var(--pup-red-600); }
 .text-xl { font-size: 1.25rem; line-height: 1.75rem; }
 .overflow-x-auto { overflow-x: auto; }
 .min-w-full { min-width: 100%; }
@@ -136,15 +145,6 @@ FULL_INLINE_CSS_ADMIN = """
 }
 """
 
-# --- Constants for CSS Class Names (Used to reference classes from FULL_INLINE_CSS_ADMIN) ---
-PUP_BURGUNDY_CLASS = 'pup-bg-burgundy'
-PUP_GOLD_CLASS = 'pup-bg-gold'
-PUP_TEXT_BURGUNDY_CLASS = 'pup-text-burgundy' 
-
-# Specific Tailwind classes used in example HTML, now defined or mapped in FULL_INLINE_CSS_ADMIN
-TAILWIND_RED_800 = 'text-red-800'
-PUP_DARK_BURGUNDY_HOVER_CLASS = 'hover:bg-red-900'
-
 
 def create_admin_page(page_title, content_func):
     doc = dominate.document(title=f"PUP Admin - {page_title}")
@@ -157,9 +157,9 @@ def create_admin_page(page_title, content_func):
     with doc.body:
         with div(_class="container mx-auto p-4 max-w-4xl"):
             # Admin Header
-            with header(_class=f"{PUP_BURGUNDY_CLASS} text-white p-4 shadow-lg flex items-center justify-between mb-6"):
+            with header(_class=f"pup-bg-burgundy text-white p-4 shadow-lg flex items-center justify-between mb-6"):
                 with div(_class="flex items-center space-x-3"):
-                    with div(_class=f"w-8 h-8 {PUP_GOLD_CLASS} rounded-full flex items-center justify-center"):
+                    with div(_class=f"w-8 h-8 pup-bg-gold rounded-full flex items-center justify-center"): # Uses PUP_GOLD_CLASS
                         i(_class=f"fas fa-tools {TAILWIND_RED_800}")
                     h1(page_title, _class="text-xl font-bold")
                 with nav():
@@ -176,7 +176,7 @@ def create_admin_page(page_title, content_func):
     return doc.render()
 
 def inventory_management_content():
-    h2("Inventory Management", _class=f"text-2xl font-bold {PUP_TEXT_BURGUNDY_CLASS} mb-4")
+    h2("Inventory Management", _class=f"text-2xl font-bold pup-text-burgundy mb-4")
     
     # Form for CRUD operations
     with form(action=url_for('handle_admin_action'), method="post", _class="bg-white rounded-lg shadow-lg p-6 mb-6"):
@@ -195,16 +195,16 @@ def inventory_management_content():
                 input_(type="text", name="price", id="price", required=True, placeholder="e.g., 150.00", _class="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:border-blue-500")
         
         with div(_class="flex flex-wrap justify-center gap-4"):
-            button("Add Item", name="action", value="add", type="submit", _class=f"flex-1 min-w-[120px] {PUP_BURGUNDY_CLASS} text-white py-3 rounded-lg font-semibold {PUP_DARK_BURGUNDY_HOVER_CLASS} transition-colors")
+            button("Add Item", name="action", value="add", type="submit", _class=f"flex-1 min-w-[120px] pup-bg-burgundy text-white py-3 rounded-lg font-semibold {TAILWIND_RED_900_HOVER} transition-colors")
             button("Update Item", name="action", value="update", type="submit", _class="flex-1 min-w-[120px] bg-blue-500 text-white py-3 rounded-lg font-semibold hover:bg-blue-600 transition-colors")
             button("Delete Item", name="action", value="delete", type="submit", _class="flex-1 min-w-[120px] bg-red-500 text-white py-3 rounded-lg font-semibold hover:bg-red-600 transition-colors")
         
-    h2("Current Inventory", _class=f"text-xl font-bold {PUP_TEXT_BURGUNDY_CLASS} mb-4")
+    h2("Current Inventory", _class=f"text-xl font-bold pup-text-burgundy mb-4")
     
     products = db.get_all_products()
     with div(_class="overflow-x-auto bg-white rounded-lg shadow-lg"):
         with table(_class="min-w-full divide-y divide-gray-200"):
-            with thead(_class=PUP_BURGUNDY_CLASS):
+            with thead(_class="pup-bg-burgundy"):
                 with tr():
                     th("ID", _class="px-4 py-2 text-left text-xs font-medium text-white uppercase tracking-wider")
                     th("Name", _class="px-4 py-2 text-left text-xs font-medium text-white uppercase tracking-wider")
@@ -246,7 +246,7 @@ def handle_admin_action():
         if quantity: quantity = int(quantity)
         if price: price = float(price)
     except ValueError:
-        flash("Quantity and Price must be numbers, Item ID must be an error.", 'error')
+        flash("Quantity and Price must be numbers, Item ID must be an integer.", 'error')
         return redirect(url_for('admin_dashboard'))
 
     if action == 'add':
