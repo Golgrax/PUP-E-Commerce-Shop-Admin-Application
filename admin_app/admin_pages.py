@@ -1,10 +1,14 @@
+# admin_app/admin_pages.py
+
+import os # <-- Add this import
 from flask import Flask, request, redirect, url_for
 import dominate
 from dominate.tags import *
 from shared import database as db
 
-# --- Admin Flask App Initialization ---
-app = Flask(__name__, static_folder='../assets')
+# --- Admin Flask App Initialization (CORRECTED with Robust Pathing) ---
+static_folder_path = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', 'assets'))
+app = Flask(__name__, static_folder=static_folder_path)
 
 def create_admin_page(page_title, content_func):
     doc = dominate.document(title=page_title)

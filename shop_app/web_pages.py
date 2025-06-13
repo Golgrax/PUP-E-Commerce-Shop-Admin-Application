@@ -1,10 +1,17 @@
+# shop_app/web_pages.py
+
+import os # <-- Add this import
 from flask import Flask, send_from_directory, render_template_string, request, redirect, url_for
 import dominate
 from dominate.tags import *
 from shared import database as db
 
-# --- Flask App Initialization ---
-app = Flask(__name__, static_folder='../assets')
+# --- Flask App Initialization (CORRECTED with Robust Pathing) ---
+# Construct the absolute path to the 'assets' directory
+# This ensures that no matter how the app is run, the path to assets is always correct.
+static_folder_path = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', 'assets'))
+app = Flask(__name__, static_folder=static_folder_path)
+
 
 # Base page structure to avoid repetition
 def create_base_page(page_title, content_div):
@@ -12,6 +19,7 @@ def create_base_page(page_title, content_div):
     with doc.head:
         meta(charset="UTF-8")
         meta(name="viewport", content="width=device-width, initial-scale=1.0")
+        # The href here remains the same, as Flask serves it from the root of the static folder
         link(rel="stylesheet", href="/static/css/style.css")
     
     with doc.body:
@@ -81,8 +89,6 @@ def product_detail_content(product):
         
         button("ADD TO CART", type="submit", cls="btn-primary")
         button("BUY NOW", type="submit", cls="btn-secondary") # For simplicity, also adds to cart
-
-# Other page content generators (cart, profile, etc.) would go here...
 
 def cart_content(_):
     h1("Shopping Cart")
@@ -182,7 +188,6 @@ def handle_feedback():
     # Redirect back to home with a thank you message (simplified)
     return redirect(url_for('home'))
 
-# Other form handlers (add to cart, etc.) would go here.
 @app.route('/add-to-cart', methods=['POST'])
 def handle_add_to_cart():
     product_id = request.form.get('product_id')
