@@ -1,14 +1,10 @@
-# admin_app/admin_pages.py
-
 import os
 from flask import Flask, request, redirect, url_for
 import dominate
 from dominate.tags import *
 from shared import database as db
 
-# --- Admin Flask App Initialization (CORRECTED) ---
 app = Flask(__name__, static_folder='assets', static_url_path='/static')
-
 
 def create_admin_page(page_title, content_func):
     doc = dominate.document(title=page_title)

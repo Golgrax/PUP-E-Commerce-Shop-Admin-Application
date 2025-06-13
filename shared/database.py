@@ -2,21 +2,17 @@ import mysql.connector
 from mysql.connector import errorcode
 import hashlib
 
-# IMPORTANT: CONFIGURE YOUR MYSQL DETAILS HERE
 DB_CONFIG = {
-    'user': 'root',          # <-- YOUR MYSQL USERNAME
-    'password': 'Test1234!',  # <-- YOUR MYSQL PASSWORD
-    'host': '127.0.0.1',     # Usually 'localhost' or '127.0.0.1'
+    'user': 'root',
+    'password': 'Test1234!',
+    'host': '127.0.0.1',
 }
 DB_NAME = 'pup_shop_db'
 
-# --- Hashing Utility ---
 def hash_password(password):
     return hashlib.sha256(password.encode()).hexdigest()
 
-# --- Database Setup ---
 def create_connection():
-    """Create a database connection to the MySQL server"""
     try:
         cnx = mysql.connector.connect(**DB_CONFIG)
         return cnx
@@ -25,7 +21,6 @@ def create_connection():
         return None
 
 def setup_database():
-    """Create database, tables, and insert placeholder data if they don't exist."""
     cnx = create_connection()
     if not cnx:
         print("Could not establish connection to MySQL. Aborting setup.")
@@ -42,7 +37,6 @@ def setup_database():
     
     cnx.close()
 
-    # Reconnect with the database selected
     db_cnx = mysql.connector.connect(**DB_CONFIG)
     cursor = db_cnx.cursor()
 
@@ -71,8 +65,6 @@ def setup_database():
         "  PRIMARY KEY (`id`)"
         ") ENGINE=InnoDB")
     
-    # ... Add other table creation SQL here (Orders, OrderItems, CartItems, etc.)
-
     for table_name in tables:
         table_description = tables[table_name]
         try:
@@ -85,7 +77,6 @@ def setup_database():
             else:
                 print(err.msg)
 
-    # Check if products table is empty before inserting
     cursor.execute("SELECT COUNT(*) FROM products")
     if cursor.fetchone()[0] == 0:
         print("Inserting placeholder products...")
@@ -107,13 +98,8 @@ def setup_database():
     cursor.close()
     db_cnx.close()
 
-# --- CRUD Operations ---
-# (A selection of required functions. A full app would have more.)
-
 def get_db_connection():
-    """Gets a connection to the specified database."""
     try:
-        # Ensure DB_NAME is set in the config
         if 'database' not in DB_CONFIG:
             DB_CONFIG['database'] = DB_NAME
         cnx = mysql.connector.connect(**DB_CONFIG)
@@ -146,8 +132,7 @@ def add_product(name, quantity, price):
     conn = get_db_connection()
     if not conn: return False
     cursor = conn.cursor()
-    # Using a placeholder image for newly added items
-    image_url = '/static/images/pup_logo.png' 
+    image_url = '/static/images/pup_logo.png'
     description = 'Newly added item.'
     try:
         cursor.execute(
