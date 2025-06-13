@@ -1,7 +1,7 @@
 # admin_app/admin_pages.py
 
 import os
-from flask import Flask, request, redirect, url_for
+from flask import Flask, request, redirect, url_for, flash, get_flashed_messages
 import dominate
 from dominate.tags import *
 from shared import database as db
@@ -9,10 +9,12 @@ from shared import database as db
 # --- Admin Flask App Initialization ---
 static_folder_path = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', 'assets'))
 app = Flask(__name__, static_folder=static_folder_path, static_url_path='/static')
+app.secret_key = 'another-secret-key-for-admin-app-change-me' # Add a secret key for flash messages
 
 # Constants for PUP Colors
 PUP_BURGUNDY = '#722F37'
 PUP_GOLD = '#FFD700'
+PUP_DARK_BURGUNDY = '#5A252A'
 
 def create_admin_page(page_title, content_func):
     doc = dominate.document(title=f"PUP Admin - {page_title}")
@@ -20,70 +22,74 @@ def create_admin_page(page_title, content_func):
         link(rel="stylesheet", href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css")
         link(rel="stylesheet", href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.4.0/css/all.min.css")
         link(rel="stylesheet", href="/static/css/style.css") # For custom font and variables
-    with doc.body(cls="bg-gray-50 font-sans"):
-        with div(cls="container mx-auto p-4 max-w-4xl"):
+    with doc.body(_class="bg-gray-50 font-sans"): # Changed cls to _class
+        with div(_class="container mx-auto p-4 max-w-4xl"): # Changed cls to _class
             # Admin Header
-            with header(cls=f"bg-[{PUP_BURGUNDY}] text-white p-4 shadow-lg flex items-center justify-between mb-6"):
-                with div(cls="flex items-center space-x-3"):
-                    with div(cls=f"w-8 h-8 bg-[{PUP_GOLD}] rounded-full flex items-center justify-center"):
-                        i(cls="fas fa-tools text-red-800")
-                    h1(page_title, cls="text-xl font-bold")
+            with header(_class=f"bg-[{PUP_BURGUNDY}] text-white p-4 shadow-lg flex items-center justify-between mb-6"): # Changed cls to _class
+                with div(_class="flex items-center space-x-3"): # Changed cls to _class
+                    with div(_class=f"w-8 h-8 bg-[{PUP_GOLD}] rounded-full flex items-center justify-center"): # Changed cls to _class
+                        i(_class="fas fa-tools text-red-800") # Changed cls to _class
+                    h1(page_title, _class="text-xl font-bold") # Changed cls to _class
                 with nav():
                     ul(
-                        li(a("Inventory", href=url_for('admin_dashboard'), cls="text-white hover:text-gray-200 mx-2")),
-                        li(a("Orders (WIP)", href="#", cls="text-white hover:text-gray-200 mx-2")),
-                        cls="flex"
+                        li(a("Inventory", href=url_for('admin_dashboard'), _class="text-white hover:text-gray-200 mx-2")), # Changed cls to _class
+                        li(a("Orders (WIP)", href="#", _class="text-white hover:text-gray-200 mx-2")), # Changed cls to _class
+                        _class="flex" # Changed cls to _class
                     )
+
+            # Flash messages (style them with Tailwind using .flash-success, .flash-error)
+            for category, message in get_flashed_messages(with_categories=True):
+                div(message, _class=f"p-3 mb-4 rounded-lg font-semibold text-sm flash-{category}") # Changed cls to _class
 
             # Main content
             content_func()
     return doc.render()
 
 def inventory_management_content():
-    h2("Inventory Management", cls=f"text-2xl font-bold text-[{PUP_BURGUNDY}] mb-4")
+    h2("Inventory Management", _class=f"text-2xl font-bold text-[{PUP_BURGUNDY}] mb-4") # Changed cls to _class
     
     # Form for CRUD operations
-    with form(action=url_for('handle_admin_action'), method="post", cls="bg-white rounded-lg shadow-lg p-6 mb-6"):
-        with div(cls="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4"):
+    with form(action=url_for('handle_admin_action'), method="post", _class="bg-white rounded-lg shadow-lg p-6 mb-6"): # Changed cls to _class
+        with div(_class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4"): # Changed cls to _class
             with div():
-                label("Item ID (for Update/Delete):", cls="block text-gray-700 font-semibold mb-2", _for="item_id")
-                input_(type="text", name="item_id", id="item_id", placeholder="e.g., 1", cls="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:border-blue-500")
+                label("Item ID (for Update/Delete):", _class="block text-gray-700 font-semibold mb-2", _for="item_id") # Changed cls to _class
+                input_(type="text", name="item_id", id="item_id", placeholder="e.g., 1", _class="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:border-blue-500") # Changed cls to _class
             with div():
-                label("Item Name:", cls="block text-gray-700 font-semibold mb-2", _for="item_name")
-                input_(type="text", name="item_name", id="item_name", required=True, cls="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:border-blue-500")
+                label("Item Name:", _class="block text-gray-700 font-semibold mb-2", _for="item_name") # Changed cls to _class
+                input_(type="text", name="item_name", id="item_name", required=True, _class="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:border-blue-500") # Changed cls to _class
             with div():
-                label("Quantity:", cls="block text-gray-700 font-semibold mb-2", _for="quantity")
-                input_(type="number", name="quantity", id="quantity", required=True, cls="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:border-blue-500")
+                label("Quantity:", _class="block text-gray-700 font-semibold mb-2", _for="quantity") # Changed cls to _class
+                input_(type="number", name="quantity", id="quantity", required=True, _class="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:border-blue-500") # Changed cls to _class
             with div():
-                label("Price:", cls="block text-gray-700 font-semibold mb-2", _for="price")
-                input_(type="text", name="price", id="price", required=True, placeholder="e.g., 150.00", cls="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:border-blue-500")
+                label("Price:", _class="block text-gray-700 font-semibold mb-2", _for="price") # Changed cls to _class
+                input_(type="text", name="price", id="price", required=True, placeholder="e.g., 150.00", _class="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:border-blue-500") # Changed cls to _class
         
-        with div(cls="flex flex-wrap justify-center gap-4"):
-            button("Add Item", name="action", value="add", type="submit", cls=f"flex-1 min-w-[120px] bg-[{PUP_BURGUNDY}] text-white py-3 rounded-lg font-semibold hover:bg-[{PUP_DARK_BURGUNDY}] transition-colors")
-            button("Update Item", name="action", value="update", type="submit", cls="flex-1 min-w-[120px] bg-blue-500 text-white py-3 rounded-lg font-semibold hover:bg-blue-600 transition-colors")
-            button("Delete Item", name="action", value="delete", type="submit", cls="flex-1 min-w-[120px] bg-red-500 text-white py-3 rounded-lg font-semibold hover:bg-red-600 transition-colors")
+        with div(_class="flex flex-wrap justify-center gap-4"): # Changed cls to _class
+            button("Add Item", name="action", value="add", type="submit", _class=f"flex-1 min-w-[120px] bg-[{PUP_BURGUNDY}] text-white py-3 rounded-lg font-semibold hover:bg-[{PUP_DARK_BURGUNDY}] transition-colors") # Changed cls to _class
+            button("Update Item", name="action", value="update", type="submit", _class="flex-1 min-w-[120px] bg-blue-500 text-white py-3 rounded-lg font-semibold hover:bg-blue-600 transition-colors") # Changed cls to _class
+            button("Delete Item", name="action", value="delete", type="submit", _class="flex-1 min-w-[120px] bg-red-500 text-white py-3 rounded-lg font-semibold hover:bg-red-600 transition-colors") # Changed cls to _class
         
-    h2("Current Inventory", cls=f"text-xl font-bold text-[{PUP_BURGUNDY}] mb-4")
+    h2("Current Inventory", _class=f"text-xl font-bold text-[{PUP_BURGUNDY}] mb-4") # Changed cls to _class
     
     products = db.get_all_products()
-    with div(cls="overflow-x-auto bg-white rounded-lg shadow-lg"):
-        with table(cls="min-w-full divide-y divide-gray-200"):
-            with thead(cls=f"bg-[{PUP_BURGUNDY}]"):
+    with div(_class="overflow-x-auto bg-white rounded-lg shadow-lg"): # Changed cls to _class
+        with table(_class="min-w-full divide-y divide-gray-200"): # Changed cls to _class
+            with thead(_class=f"bg-[{PUP_BURGUNDY}]"): # Changed cls to _class
                 with tr():
-                    th("ID", cls="px-4 py-2 text-left text-xs font-medium text-white uppercase tracking-wider")
-                    th("Name", cls="px-4 py-2 text-left text-xs font-medium text-white uppercase tracking-wider")
-                    th("Quantity (Stock)", cls="px-4 py-2 text-left text-xs font-medium text-white uppercase tracking-wider")
-                    th("Price", cls="px-4 py-2 text-left text-xs font-medium text-white uppercase tracking-wider")
-            with tbody(cls="bg-white divide-y divide-gray-200"):
+                    th("ID", _class="px-4 py-2 text-left text-xs font-medium text-white uppercase tracking-wider") # Changed cls to _class
+                    th("Name", _class="px-4 py-2 text-left text-xs font-medium text-white uppercase tracking-wider") # Changed cls to _class
+                    th("Quantity (Stock)", _class="px-4 py-2 text-left text-xs font-medium text-white uppercase tracking-wider") # Changed cls to _class
+                    th("Price", _class="px-4 py-2 text-left text-xs font-medium text-white uppercase tracking-wider") # Changed cls to _class
+            with tbody(_class="bg-white divide-y divide-gray-200"): # Changed cls to _class
                 if not products:
                     with tr():
-                        td("No products found.", colspan="4", cls="px-4 py-2 whitespace-nowrap text-sm text-gray-500 text-center")
+                        td("No products found.", colspan="4", _class="px-4 py-2 whitespace-nowrap text-sm text-gray-500 text-center") # Changed cls to _class
                 for p in products:
                     with tr():
-                        td(p['id'], cls="px-4 py-2 whitespace-nowrap text-sm font-medium text-gray-900")
-                        td(p['name'], cls="px-4 py-2 whitespace-nowrap text-sm text-gray-700")
-                        td(p['stock'], cls="px-4 py-2 whitespace-nowrap text-sm text-gray-500")
-                        td(f"₱{p['price']:.2f}", cls="px-4 py-2 whitespace-nowrap text-sm text-gray-500")
+                        td(p['id'], _class="px-4 py-2 whitespace-nowrap text-sm font-medium text-gray-900") # Changed cls to _class
+                        td(p['name'], _class="px-4 py-2 whitespace-nowrap text-sm text-gray-700") # Changed cls to _class
+                        td(p['stock'], _class="px-4 py-2 whitespace-nowrap text-sm text-gray-500") # Changed cls to _class
+                        td(f"₱{p['price']:.2f}", _class="px-4 py-2 whitespace-nowrap text-sm text-gray-500") # Changed cls to _class
 
 @app.route('/admin')
 def admin_dashboard():
