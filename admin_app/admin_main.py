@@ -3,8 +3,8 @@ import tkinterweb
 import threading
 import time
 
-# Import the Flask app instance from the other file
-from .admin_pages import app as admin_flask_app
+# CHANGE THIS LINE: from .admin_pages import app as admin_flask_app
+from admin_app.admin_pages import app as admin_flask_app
 
 # --- Flask Server Thread for Admin ---
 def run_admin_flask():

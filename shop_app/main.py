@@ -7,8 +7,8 @@ from flask import Flask, send_from_directory
 import os
 import configparser
 
-# Import the Flask app instance from the other file
-from .web_pages import app as flask_app
+# CHANGE THIS LINE: from .web_pages import app as flask_app
+from shop_app.web_pages import app as flask_app
 
 # --- Configuration for Splash Screen ---
 CONFIG_FILE = 'shop_app/config.ini'
