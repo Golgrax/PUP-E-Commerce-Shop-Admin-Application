@@ -1,16 +1,15 @@
 # shop_app/web_pages.py
 
-import os # <-- Add this import
+import os
 from flask import Flask, send_from_directory, render_template_string, request, redirect, url_for
 import dominate
 from dominate.tags import *
 from shared import database as db
 
-# --- Flask App Initialization (CORRECTED with Robust Pathing) ---
-# Construct the absolute path to the 'assets' directory
-# This ensures that no matter how the app is run, the path to assets is always correct.
-static_folder_path = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', 'assets'))
-app = Flask(__name__, static_folder=static_folder_path)
+# --- Flask App Initialization (CORRECTED) ---
+# When running as a module from the project root, 'assets' is a top-level directory.
+# This is a simpler and more reliable way to set the path.
+app = Flask(__name__, static_folder='assets', static_url_path='/static')
 
 
 # Base page structure to avoid repetition
@@ -19,7 +18,6 @@ def create_base_page(page_title, content_div):
     with doc.head:
         meta(charset="UTF-8")
         meta(name="viewport", content="width=device-width, initial-scale=1.0")
-        # The href here remains the same, as Flask serves it from the root of the static folder
         link(rel="stylesheet", href="/static/css/style.css")
     
     with doc.body:
@@ -40,12 +38,10 @@ def login_register_content(_):
         input_(type="email", id="email", name="email", required=True)
         label("Password:", _for="password")
         input_(type="password", id="password", name="password", required=True)
-        # In a real app, confirm password would be validated
         label("Confirm Password:", _for="confirm_password")
         input_(type="password", id="confirm_password", name="confirm_password", required=True)
         button("REGISTER", type="submit", cls="btn-secondary")
     
-    # Simple separator
     hr()
     a("Already have an account? Login (Feature WIP)", href="#")
 
@@ -57,11 +53,13 @@ def homepage_content(_):
 
     products = db.get_all_products()
     with div(cls="product-grid"):
-        for p in products:
-            with a(href=url_for('product_detail', product_id=p['id']), cls="product-item"):
-                img(src=p['image_url'])
-                h3(p['name'])
-                p(f"₱{p['price']:.2f}")
+        # --- FIX: Changed loop variable from 'p' to 'product' ---
+        for product in products:
+            with a(href=url_for('product_detail', product_id=product['id']), cls="product-item"):
+                img(src=product['image_url'])
+                h3(product['name'])
+                # Now using the 'dominate' p tag, not the dictionary
+                p(f"₱{product['price']:.2f}")
 
 def product_detail_content(product):
     if not product:
@@ -79,7 +77,6 @@ def product_detail_content(product):
 
     with form(action="/add-to-cart", method="post"):
         input_(type="hidden", name="product_id", value=product['id'])
-        # Placeholder for variations
         if product.get('variations'):
             label("Select Variation:")
             select_tag = select(name="variation")
@@ -88,12 +85,10 @@ def product_detail_content(product):
                     option(var, value=var)
         
         button("ADD TO CART", type="submit", cls="btn-primary")
-        button("BUY NOW", type="submit", cls="btn-secondary") # For simplicity, also adds to cart
+        button("BUY NOW", type="submit", cls="btn-secondary")
 
 def cart_content(_):
     h1("Shopping Cart")
-    # This is a simplified version. A real cart needs user sessions.
-    # For now, it's just a placeholder page.
     div("Your cart is currently empty.")
     p("Add items from the homepage to see them here.")
     a("CHECK OUT", href="#", cls="btn btn-checkout")
@@ -112,7 +107,6 @@ def profile_content(_):
 
 def order_history_content(_):
     h1("Order History")
-    # Placeholder data
     with table(cls="admin-table"):
         with thead():
             with tr():
@@ -174,9 +168,7 @@ def handle_register():
     name = request.form['name']
     email = request.form['email']
     password = request.form['password']
-    # Add validation here in a real app
     db.create_user(name, email, password)
-    # Redirect to home, ideally with a success message
     return redirect(url_for('home'))
 
 @app.route('/submit-feedback', methods=['POST'])
@@ -185,7 +177,6 @@ def handle_feedback():
     email = request.form.get('email')
     message = request.form.get('message')
     print(f"Feedback Received:\nName: {name}\nEmail: {email}\nMessage: {message}")
-    # Redirect back to home with a thank you message (simplified)
     return redirect(url_for('home'))
 
 @app.route('/add-to-cart', methods=['POST'])

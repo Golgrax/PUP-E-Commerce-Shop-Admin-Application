@@ -1,14 +1,14 @@
 # admin_app/admin_pages.py
 
-import os # <-- Add this import
+import os
 from flask import Flask, request, redirect, url_for
 import dominate
 from dominate.tags import *
 from shared import database as db
 
-# --- Admin Flask App Initialization (CORRECTED with Robust Pathing) ---
-static_folder_path = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', 'assets'))
-app = Flask(__name__, static_folder=static_folder_path)
+# --- Admin Flask App Initialization (CORRECTED) ---
+app = Flask(__name__, static_folder='assets', static_url_path='/static')
+
 
 def create_admin_page(page_title, content_func):
     doc = dominate.document(title=page_title)
@@ -22,7 +22,6 @@ def create_admin_page(page_title, content_func):
 def inventory_management_content():
     h1("Inventory Management")
     
-    # Form for CRUD operations
     with form(action="/admin/action", method="post"):
         with table(style="width: 100%; text-align: left;"):
             with tr():
