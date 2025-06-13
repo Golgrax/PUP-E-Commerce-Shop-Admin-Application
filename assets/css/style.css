@@ -7,213 +7,49 @@
     font-style: normal;
 }
 
-body {
-    font-family: 'RocaOne', sans-serif;
-    background-color: #fdfbf7;
-    color: #4a4a4a;
-    margin: 0;
-    padding: 20px;
-    text-align: center;
+/* Custom CSS variables for PUP colors */
+:root {
+    --pup-burgundy: #722F37;
+    --pup-gold: #FFD700;
+    --pup-dark-burgundy: #5A252A;
+    --pup-teal: #00BCD4; /* From previous design, kept for "REGISTER" button */
 }
 
-.container {
-    max-width: 400px;
-    margin: 0 auto;
+/* Basic font application and body styling */
+body {
+    font-family: 'RocaOne', sans-serif;
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box; /* Include padding/border in element's total width/height */
+    height: 100vh; /* Make body take full viewport height */
+    overflow-y: auto; /* Allow scrolling for content */
+}
+
+/* Base styles for the bottom navigation and content */
+.bottom-nav {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    z-index: 50;
+}
+
+.content-container {
     padding-bottom: 80px; /* Space for fixed bottom nav */
 }
 
-/* --- NEW: Navigation Elements --- */
-.top-nav {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 15px;
-    height: 40px; /* Give it some height for alignment */
-}
-
-.back-button {
-    font-size: 14px;
-    color: #007bff;
-    text-decoration: none;
-    font-weight: bold;
-    padding: 5px 10px;
-}
-
-.user-info {
-    font-size: 14px;
-    text-align: right;
-}
-
-.user-info a {
-    color: #8c1515; /* PUP Maroon */
-    margin-left: 10px;
-}
-
-/* --- General --- */
-.logo {
-    width: 100px;
-    height: auto;
-    margin-bottom: 20px;
-}
-
-h1, h2, h3 {
-    color: #8c1515; /* PUP Maroon */
-}
-
-a {
-    color: #007bff;
-    text-decoration: none;
-}
-
-/* --- Forms & Buttons --- */
-.form-container {
-    background-color: white;
-    padding: 20px;
-    border-radius: 8px;
-    margin-bottom: 20px;
-    border: 1px solid #eee;
-    text-align: left; /* Align labels/inputs */
-}
-
-.form-container label {
-    display: block; /* Each label on its own line */
-    margin-top: 10px;
-    margin-bottom: 5px;
-    font-weight: bold;
-    color: #8c1515; /* PUP Maroon for labels */
-}
-
-input[type="text"],
-input[type="email"],
-input[type="password"],
-textarea {
-    width: calc(100% - 24px); /* Full width minus padding */
-    padding: 12px;
-    margin: 8px 0;
-    border: 1px solid #ccc;
-    border-radius: 8px;
-    box-sizing: border-box;
-    font-family: 'RocaOne', sans-serif; /* Apply font to inputs */
-}
-
-.btn, button {
-    font-family: 'RocaOne', sans-serif;
-    background-color: #00bcd4; /* Teal */
+/* Cart badge styling */
+.cart-badge {
+    position: absolute;
+    top: -8px;
+    right: -8px;
+    background: #EF4444; /* Tailwind red-500 */
     color: white;
-    padding: 14px 20px;
-    margin: 8px auto; /* Auto margins for centering */
-    border: none;
-    border-radius: 25px;
-    cursor: pointer;
-    width: 80%;
-    font-size: 16px;
-    text-transform: uppercase;
-    display: block; /* Make buttons block level for centering */
-}
-
-.btn-primary {
-    background-color: #8c1515; /* PUP Maroon */
-}
-
-.btn-secondary {
-    background-color: #00bcd4; /* Teal */
-}
-
-/* Specific buttons for login/register page */
-.btn-login-page {
-    width: 80%;
-    margin: 10px auto;
-    border-radius: 25px;
-    padding: 12px 20px;
-}
-.btn-register-page {
-    width: 80%;
-    margin: 10px auto;
-    border-radius: 25px;
-    padding: 12px 20px;
-    background-color: #00bcd4; /* Teal */
-}
-
-.btn-checkout {
-    font-size: 24px;
-    width: 90%;
-    padding: 20px;
-    margin-top: 20px;
-    background-color: #ff5722;
-}
-
-/* --- Flash Messages --- */
-.flash-message {
-    padding: 10px;
-    margin-bottom: 15px;
-    border-radius: 5px;
-    font-weight: bold;
-}
-.flash-success {
-    background-color: #d4edda;
-    color: #155724;
-    border: 1px solid #c3e6cb;
-}
-.flash-error {
-    background-color: #f8d7da;
-    color: #721c24;
-    border: 1px solid #f5c6cb;
-}
-
-/* --- Product & Cart --- */
-.product-grid {
-    display: grid;
-    grid-template-columns: repeat(2, 1fr);
-    gap: 15px;
-}
-
-.product-item {
-    border: 1px solid #eee;
-    border-radius: 8px;
-    padding: 10px;
-    background: white;
-    box-shadow: 0 2px 4px rgba(0,0,0,0.05);
-}
-
-.product-item img {
-    max-width: 100%;
-    border-radius: 4px;
-}
-
-.cart-item {
-    display: flex;
-    align-items: center;
-    margin-bottom: 15px;
-    border-bottom: 1px solid #eee;
-    padding-bottom: 15px;
-    text-align: left;
-}
-
-.cart-item img {
-    width: 80px;
-    height: 80px;
-    object-fit: cover;
-    margin-right: 15px;
-}
-
-.cart-item-details {
-    flex-grow: 1;
-}
-
-.cart-item-details a {
-    color: #ff5722;
+    border-radius: 50%;
+    width: 20px;
+    height: 20px;
     font-size: 12px;
-}
-
-.quantity-control {
     display: flex;
     align-items: center;
-}
-
-.quantity-control a, .quantity-control span {
-    padding: 5px 10px;
-    border: 1px solid #ccc;
-    margin: 0 5px;
-    text-decoration: none;
-    color: #4a4a4a;
+    justify-content: center;
 }
