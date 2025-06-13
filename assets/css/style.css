@@ -1,0 +1,152 @@
+@font-face {
+    font-family: 'RocaOne';
+    src: url('/static/fonts/RocaOne-Bold.ttf') format('truetype');
+    font-weight: bold;
+    font-style: normal;
+}
+
+body {
+    font-family: 'RocaOne', sans-serif;
+    background-color: #fdfbf7;
+    color: #4a4a4a;
+    margin: 0;
+    padding: 20px;
+    text-align: center;
+}
+
+.container {
+    max-width: 400px;
+    margin: 0 auto;
+    padding-bottom: 80px; /* Space for fixed bottom nav */
+}
+
+/* --- General --- */
+.logo {
+    width: 100px;
+    height: auto;
+    margin-bottom: 20px;
+}
+
+h1, h2, h3 {
+    color: #8c1515; /* PUP Maroon */
+}
+
+a {
+    color: #007bff;
+    text-decoration: none;
+}
+
+/* --- Forms & Buttons --- */
+input[type="text"],
+input[type="email"],
+input[type="password"],
+textarea {
+    width: 90%;
+    padding: 12px;
+    margin: 8px 0;
+    border: 1px solid #ccc;
+    border-radius: 8px;
+    box-sizing: border-box;
+}
+
+.btn, button {
+    font-family: 'RocaOne', sans-serif;
+    background-color: #00bcd4; /* Teal */
+    color: white;
+    padding: 14px 20px;
+    margin: 8px 0;
+    border: none;
+    border-radius: 25px;
+    cursor: pointer;
+    width: 80%;
+    font-size: 16px;
+    text-transform: uppercase;
+}
+
+.btn-primary {
+    background-color: #8c1515; /* PUP Maroon */
+}
+
+.btn-secondary {
+    background-color: #00bcd4; /* Teal */
+}
+
+.btn-checkout {
+    font-size: 24px;
+    width: 90%;
+    padding: 20px;
+    margin-top: 20px;
+    background-color: #ff5722;
+}
+
+/* --- Product & Cart --- */
+.product-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 15px;
+}
+
+.product-item {
+    border: 1px solid #eee;
+    border-radius: 8px;
+    padding: 10px;
+    background: white;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+}
+
+.product-item img {
+    max-width: 100%;
+    border-radius: 4px;
+}
+
+.cart-item {
+    display: flex;
+    align-items: center;
+    margin-bottom: 15px;
+    border-bottom: 1px solid #eee;
+    padding-bottom: 15px;
+}
+
+.cart-item img {
+    width: 80px;
+    height: 80px;
+    object-fit: cover;
+    margin-right: 15px;
+}
+
+.cart-item-details {
+    flex-grow: 1;
+    text-align: left;
+}
+
+.quantity-control {
+    display: flex;
+    align-items: center;
+}
+
+.quantity-control a, .quantity-control span {
+    padding: 5px 10px;
+    border: 1px solid #ccc;
+    margin: 0 5px;
+    text-decoration: none;
+    color: #4a4a4a;
+}
+
+
+/* --- Admin Table --- */
+.admin-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 20px;
+}
+
+.admin-table th, .admin-table td {
+    border: 1px solid #ddd;
+    padding: 8px;
+    text-align: left;
+}
+
+.admin-table th {
+    background-color: #8c1515;
+    color: white;
+}
