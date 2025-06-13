@@ -11,10 +11,11 @@ static_folder_path = os.path.abspath(os.path.join(os.path.dirname(__file__), '..
 app = Flask(__name__, static_folder=static_folder_path, static_url_path='/static')
 app.secret_key = 'another-secret-key-for-admin-app-change-me' # Add a secret key for flash messages
 
-# Constants for PUP Colors
-PUP_BURGUNDY = '#722F37'
-PUP_GOLD = '#FFD700'
-PUP_DARK_BURGUNDY = '#5A252A'
+# Constants for PUP Colors (Used in Python for clarity, translated to custom CSS classes)
+PUP_BURGUNDY_CLASS = 'pup-bg-burgundy'
+PUP_GOLD_CLASS = 'pup-bg-gold'
+PUP_DARK_BURGUNDY_CLASS = 'pup-dark-burgundy'
+
 
 def create_admin_page(page_title, content_func):
     doc = dominate.document(title=f"PUP Admin - {page_title}")
@@ -23,20 +24,20 @@ def create_admin_page(page_title, content_func):
         meta(name="viewport", content="width=device-width, initial-scale=1.0")
         link(rel="stylesheet", href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css")
         link(rel="stylesheet", href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.4.0/css/all.min.css")
-        link(rel="stylesheet", href="/static/css/style.css") # For custom font and variables
+        link(rel="stylesheet", href="/static/css/style.css") # For custom font and variables, and custom PUP color classes
     
-    # FIX: Apply _class to doc.body directly before the 'with' block
+    # Apply body classes directly to the body tag object
     doc.body._class = "bg-gray-50 font-sans"
     with doc.body:
         with div(_class="container mx-auto p-4 max-w-4xl"):
             # Admin Header
-            with header(_class=f"bg-[{PUP_BURGUNDY}] text-white p-4 shadow-lg flex items-center justify-between mb-6"):
+            with header(_class=f"{PUP_BURGUNDY_CLASS} text-white p-4 shadow-lg flex items-center justify-between mb-6"):
                 with div(_class="flex items-center space-x-3"):
-                    with div(_class=f"w-8 h-8 bg-[{PUP_GOLD}] rounded-full flex items-center justify-center"):
+                    with div(_class=f"w-8 h-8 {PUP_GOLD_CLASS} rounded-full flex items-center justify-center"):
                         i(_class="fas fa-tools text-red-800")
                     h1(page_title, _class="text-xl font-bold")
                 with nav():
-                    with ul(_class="flex"): # FIX: Added 'with' for ul for consistency, changed cls to _class
+                    with ul(_class="flex"):
                         li(a("Inventory", href=url_for('admin_dashboard'), _class="text-white hover:text-gray-200 mx-2"))
                         li(a("Orders (WIP)", href="#", _class="text-white hover:text-gray-200 mx-2"))
 
@@ -49,7 +50,7 @@ def create_admin_page(page_title, content_func):
     return doc.render()
 
 def inventory_management_content():
-    h2("Inventory Management", _class=f"text-2xl font-bold text-[{PUP_BURGUNDY}] mb-4")
+    h2("Inventory Management", _class=f"text-2xl font-bold {PUP_TEXT_BURGUNDY_CLASS} mb-4")
     
     # Form for CRUD operations
     with form(action=url_for('handle_admin_action'), method="post", _class="bg-white rounded-lg shadow-lg p-6 mb-6"):
@@ -68,16 +69,16 @@ def inventory_management_content():
                 input_(type="text", name="price", id="price", required=True, placeholder="e.g., 150.00", _class="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:border-blue-500")
         
         with div(_class="flex flex-wrap justify-center gap-4"):
-            button("Add Item", name="action", value="add", type="submit", _class=f"flex-1 min-w-[120px] bg-[{PUP_BURGUNDY}] text-white py-3 rounded-lg font-semibold hover:bg-[{PUP_DARK_BURGUNDY}] transition-colors")
+            button("Add Item", name="action", value="add", type="submit", _class=f"flex-1 min-w-[120px] {PUP_BURGUNDY_CLASS} text-white py-3 rounded-lg font-semibold hover:bg-[{PUP_DARK_BURGUNDY_CLASS}] transition-colors")
             button("Update Item", name="action", value="update", type="submit", _class="flex-1 min-w-[120px] bg-blue-500 text-white py-3 rounded-lg font-semibold hover:bg-blue-600 transition-colors")
             button("Delete Item", name="action", value="delete", type="submit", _class="flex-1 min-w-[120px] bg-red-500 text-white py-3 rounded-lg font-semibold hover:bg-red-600 transition-colors")
         
-    h2("Current Inventory", _class=f"text-xl font-bold text-[{PUP_BURGUNDY}] mb-4")
+    h2("Current Inventory", _class=f"text-xl font-bold {PUP_TEXT_BURGUNDY_CLASS} mb-4")
     
     products = db.get_all_products()
     with div(_class="overflow-x-auto bg-white rounded-lg shadow-lg"):
         with table(_class="min-w-full divide-y divide-gray-200"):
-            with thead(_class=f"bg-[{PUP_BURGUNDY}]"):
+            with thead(_class=PUP_BURGUNDY_CLASS):
                 with tr():
                     th("ID", _class="px-4 py-2 text-left text-xs font-medium text-white uppercase tracking-wider")
                     th("Name", _class="px-4 py-2 text-left text-xs font-medium text-white uppercase tracking-wider")

@@ -1,5 +1,6 @@
 /* assets/css/style.css */
 
+/* Custom Font */
 @font-face {
     font-family: 'RocaOne';
     src: url('/static/fonts/RocaOne-Bold.ttf') format('truetype');
@@ -14,6 +15,13 @@
     --pup-dark-burgundy: #5A252A;
     --pup-teal: #00BCD4; /* From previous design, kept for "REGISTER" button */
 }
+
+/* Custom classes using CSS variables */
+.pup-bg-burgundy { background-color: var(--pup-burgundy); }
+.pup-bg-gold { background-color: var(--pup-gold); }
+.pup-text-burgundy { color: var(--pup-burgundy); }
+.pup-text-gold { color: var(--pup-gold); }
+.pup-border-burgundy { border-color: var(--pup-burgundy); }
 
 /* Basic font application and body styling */
 body {
@@ -38,6 +46,25 @@ body {
     padding-bottom: 80px; /* Space for fixed bottom nav */
 }
 
+/* Sections - for multi-page simulation within one HTML */
+/* Note: For Flask routes, sections will be distinct pages,
+   so 'section.active' might not be strictly needed here if
+   Flask handles page changes fully, but good to keep for consistency. */
+.section {
+    /* display: none; */ /* Uncomment if you want to mimic single-page app behavior */
+}
+.section.active {
+    /* display: block; */ /* Uncomment if you want to mimic single-page app behavior */
+}
+
+.product-card {
+    transition: transform 0.2s;
+}
+
+.product-card:hover {
+    transform: translateY(-2px);
+}
+
 /* Cart badge styling */
 .cart-badge {
     position: absolute;
@@ -52,4 +79,31 @@ body {
     display: flex;
     align-items: center;
     justify-content: center;
+}
+
+/* Flash Messages */
+.flash-message {
+    padding: 10px;
+    margin-bottom: 15px;
+    border-radius: 5px;
+    font-weight: bold;
+    text-align: center;
+}
+.flash-success {
+    background-color: #d4edda;
+    color: #155724;
+    border: 1px solid #c3e6cb;
+}
+.flash-error {
+    background-color: #f8d7da;
+    color: #721c24;
+    border: 1px solid #f5c6cb;
+}
+
+/* General form element styling for consistency */
+input[type="text"],
+input[type="email"],
+input[type="password"],
+textarea {
+    font-family: 'RocaOne', sans-serif; /* Apply custom font */
 }
