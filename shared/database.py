@@ -5,7 +5,7 @@ import hashlib
 # IMPORTANT: CONFIGURE YOUR MYSQL DETAILS HERE
 DB_CONFIG = {
     'user': 'root',          # <-- YOUR MYSQL USERNAME
-    'password': 'password',  # <-- YOUR MYSQL PASSWORD
+    'password': 'Test1234!',  # <-- YOUR MYSQL PASSWORD
     'host': '127.0.0.1',     # Usually 'localhost' or '127.0.0.1'
 }
 DB_NAME = 'pup_shop_db'
