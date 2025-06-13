@@ -13,27 +13,44 @@
     --pup-burgundy: #722F37;
     --pup-gold: #FFD700;
     --pup-dark-burgundy: #5A252A;
-    --pup-teal: #00BCD4; /* From previous design, kept for "REGISTER" button */
+    --pup-teal-400: #4FD1C5; /* Corresponds to Tailwind cyan-400 */
+    --pup-teal-500: #00BCD4; /* Corresponds to Tailwind cyan-500 from your example */
+    --pup-red-500: #EF4444; /* Corresponds to Tailwind red-500 */
+    --pup-red-600: #DC2626; /* Corresponds to Tailwind red-600 */
+    --pup-red-800: #991B1B; /* Corresponds to Tailwind red-800 from your example */
+    --pup-red-900: #7F1D1D; /* Corresponds to Tailwind red-900 from your example */
 }
 
-/* Custom classes using CSS variables */
+/* Custom classes using CSS variables for colors */
 .pup-bg-burgundy { background-color: var(--pup-burgundy); }
 .pup-bg-gold { background-color: var(--pup-gold); }
 .pup-text-burgundy { color: var(--pup-burgundy); }
 .pup-text-gold { color: var(--pup-gold); }
 .pup-border-burgundy { border-color: var(--pup-burgundy); }
 
-/* Basic font application and body styling */
+/* Tailwind-like classes for specific colors used in example */
+.bg-yellow-400 { background-color: var(--pup-gold); } /* Use pup-gold for consistency */
+.text-red-800 { color: var(--pup-red-800); }
+.bg-red-500 { background-color: var(--pup-red-500); }
+.hover\:bg-red-600:hover { background-color: var(--pup-red-600); }
+.bg-cyan-400 { background-color: var(--pup-teal-400); }
+.hover\:bg-cyan-500:hover { background-color: var(--pup-teal-500); }
+.bg-cyan-500 { background-color: var(--pup-teal-500); }
+.hover\:bg-cyan-600:hover { background-color: #008C99; } /* A darker teal for hover */
+.hover\:bg-red-900:hover { background-color: var(--pup-red-900); }
+
+
+/* Global body and font styles (from Tailwind base, custom font) */
 body {
     font-family: 'RocaOne', sans-serif;
     margin: 0;
     padding: 0;
-    box-sizing: border-box; /* Include padding/border in element's total width/height */
-    height: 100vh; /* Make body take full viewport height */
-    overflow-y: auto; /* Allow scrolling for content */
+    box-sizing: border-box;
+    height: 100vh;
+    overflow-y: auto;
 }
 
-/* Base styles for the bottom navigation and content */
+/* Layout containers */
 .bottom-nav {
     position: fixed;
     bottom: 0;
@@ -43,20 +60,17 @@ body {
 }
 
 .content-container {
-    padding-bottom: 80px; /* Space for fixed bottom nav */
+    padding-bottom: 80px;
 }
 
-/* Sections - for multi-page simulation within one HTML */
-/* Note: For Flask routes, sections will be distinct pages,
-   so 'section.active' might not be strictly needed here if
-   Flask handles page changes fully, but good to keep for consistency. */
+/* Sections - for multi-page simulation within one HTML.
+   Since Flask renders separate pages, these can be default `display: block`.
+   No `display: none` or `section.active` is necessary for Flask's rendering model. */
 .section {
-    /* display: none; */ /* Uncomment if you want to mimic single-page app behavior */
-}
-.section.active {
-    /* display: block; */ /* Uncomment if you want to mimic single-page app behavior */
+    padding: 1rem; /* Add default padding to sections */
 }
 
+/* Other component styles copied from your example's embedded CSS */
 .product-card {
     transition: transform 0.2s;
 }
@@ -65,12 +79,11 @@ body {
     transform: translateY(-2px);
 }
 
-/* Cart badge styling */
 .cart-badge {
     position: absolute;
     top: -8px;
     right: -8px;
-    background: #EF4444; /* Tailwind red-500 */
+    background: #EF4444; /* Red color from Tailwind */
     color: white;
     border-radius: 50%;
     width: 20px;
@@ -98,12 +111,4 @@ body {
     background-color: #f8d7da;
     color: #721c24;
     border: 1px solid #f5c6cb;
-}
-
-/* General form element styling for consistency */
-input[type="text"],
-input[type="email"],
-input[type="password"],
-textarea {
-    font-family: 'RocaOne', sans-serif; /* Apply custom font */
 }

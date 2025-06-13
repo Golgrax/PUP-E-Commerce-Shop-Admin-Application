@@ -13,18 +13,23 @@ static_folder_path = os.path.abspath(os.path.join(os.path.dirname(__file__), '..
 app = Flask(__name__, static_folder=static_folder_path, static_url_path='/static')
 app.secret_key = 'a-super-secret-key-for-development-change-me' # REQUIRED for sessions and flash messages
 
-# --- Constants for PUP Colors (Used in Python for clarity, translated to custom CSS classes) ---
-# These Python constants are used to construct the custom CSS classes.
-# The actual CSS values are in assets/css/style.css
+# --- Constants for CSS Class Names (Used to reference classes from style.css) ---
 PUP_BURGUNDY_CLASS = 'pup-bg-burgundy'
 PUP_GOLD_CLASS = 'pup-bg-gold'
-PUP_DARK_BURGUNDY_CLASS = 'pup-dark-burgundy' # No direct use of this in bg, but kept as variable
-PUP_TEAL_CLASS = 'bg-cyan-400' # Matching example HTML directly for cyan-400/500
-PUP_TEAL_HOVER_CLASS = 'hover:bg-cyan-500'
-PUP_TEAL_REGISTER_CLASS = 'bg-cyan-500'
-PUP_TEAL_REGISTER_HOVER_CLASS = 'hover:bg-cyan-600'
 PUP_TEXT_BURGUNDY_CLASS = 'pup-text-burgundy'
 PUP_BORDER_BURGUNDY_CLASS = 'pup-border-burgundy'
+
+# Specific Tailwind classes from example HTML, now defined or mapped in style.css
+# These are the actual string classes used in _class=""
+TAILWIND_YELLOW_400 = 'bg-yellow-400' # Mapped to pup-gold in style.css
+TAILWIND_RED_800 = 'text-red-800'
+TAILWIND_RED_500 = 'bg-red-500'
+TAILWIND_HOVER_RED_600 = 'hover:bg-red-600'
+TAILWIND_RED_900_HOVER = 'hover:bg-red-900'
+TAILWIND_CYAN_400 = 'bg-cyan-400'
+TAILWIND_HOVER_CYAN_500 = 'hover:bg-cyan-500'
+TAILWIND_CYAN_500 = 'bg-cyan-500'
+TAILWIND_HOVER_CYAN_600 = 'hover:bg-cyan-600'
 
 
 # --- Login Required Decorator ---
@@ -45,46 +50,40 @@ def create_base_page(page_title, content_func, current_nav_item=None, show_heade
         meta(name="viewport", content="width=device-width, initial-scale=1.0")
         link(rel="stylesheet", href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css")
         link(rel="stylesheet", href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.4.0/css/all.min.css")
-        link(rel="stylesheet", href="/static/css/style.css") # For custom font and variables, and custom PUP color classes
+        link(rel="stylesheet", href="/static/css/style.css") # For custom font and classes
 
-    # Apply body classes directly to the body tag object
     doc.body._class = "bg-gray-50 font-sans"
-
     with doc.body:
         # Header
         if show_header_nav:
             with header(_class=f"{PUP_BURGUNDY_CLASS} text-white p-4 shadow-lg"):
                 with div(_class="flex items-center justify-between"):
                     with div(_class="flex items-center space-x-3"):
-                        with div(_class=f"w-10 h-10 bg-[{PUP_GOLD_CLASS}] rounded-full flex items-center justify-center"): # bg-yellow-400 from example
-                            i(_class="fas fa-star text-red-800")
+                        with div(_class=f"w-10 h-10 {TAILWIND_YELLOW_400} rounded-full flex items-center justify-center"):
+                            i(_class=f"fas fa-star {TAILWIND_RED_800}")
                         with div():
                             h1("StudywithStyle", _class="text-lg font-bold")
                             p("PUP Official Store", _class="text-xs opacity-90")
                     with div(_class="flex space-x-3"):
                         with div(_class="relative"):
-                            # Corrected: a(href)(content) syntax
                             a(href=url_for('cart'), _class="p-2 bg-black bg-opacity-20 rounded-full")(
                                 i(_class="fas fa-shopping-cart")
                             )
-                            # Cart badge
                             total_cart_items = sum(session.get('cart', {}).values())
                             if total_cart_items > 0:
                                 span(str(total_cart_items), id="cart-badge", _class="cart-badge")
                             else:
                                 span(str(total_cart_items), id="cart-badge", _class="cart-badge", style="display: none;")
-                        # Corrected: a(href)(content) syntax
                         a(href=url_for('profile'), _class="p-2 bg-black bg-opacity-20 rounded-full")(
                             i(_class="fas fa-user")
                         )
         
         # Main Content Container
-        with main(_class="content-container"): # Removed p-4 here as each section will have its own padding
-            # Flash messages (style them with Tailwind using .flash-success, .flash-error)
+        with main(_class="content-container"):
+            # Flash messages
             for category, message in get_flashed_messages(with_categories=True):
                 div(message, _class=f"p-3 mb-4 rounded-lg font-semibold text-sm flash-{category}")
 
-            # Page-specific content
             content_func(app)
 
         # Bottom Navigation
@@ -106,23 +105,38 @@ def create_base_page(page_title, content_func, current_nav_item=None, show_heade
                         i(_class="fas fa-user text-xl")
                         span("Profile", _class="text-xs")
         
-        # Help Button (fixed position, from example)
+        # Help Button
         if show_header_nav:
-            # Corrected: a(href)(content) syntax
             a(href=url_for('contact_us'), _class="fixed bottom-24 right-4 w-12 h-12 bg-black text-white rounded-full shadow-lg z-40 flex items-center justify-center")(
                 i(_class="fas fa-question")
             )
+        
+        # This script helps tkinterweb refresh the view correctly after a Flask redirect
+        # It explicitly tells the HtmlFrame to reload the current URL.
+        script_content = f"""
+        document.addEventListener('DOMContentLoaded', function() {{
+            // This is a client-side workaround for tkinterweb not always reloading after server redirects
+            // It makes the page reload if the URL has changed without a full page load.
+            const currentFlaskUrl = window.location.href;
+            if (window.top && window.top.tkinterweb_frame) {{
+                // This line is a custom event that TkinterWeb might pick up
+                // (though a direct reload is more reliable for simple Flask apps)
+                window.top.tkinterweb_frame.load_url(currentFlaskUrl);
+            }}
+        }});
+        """
+        script(script_content)
 
     return doc.render()
 
-# --- Page Content Generators (Adapted to Tailwind CSS) ---
+# --- Page Content Generators (Adapted to Tailwind CSS and custom classes) ---
 
 # Login Section (matches example's login section)
 def login_content(_):
-    with section(id="login", _class="section active p-4"): # Added section wrapping as in HTML sample
+    with section(id="login", _class="section p-4"): # Ensure p-4 is on the section
         with div(_class="text-center mb-6"):
-            with div(_class=f"w-16 h-16 {PUP_GOLD_CLASS} rounded-full flex items-center justify-center mx-auto mb-4"): # bg-yellow-400
-                i(_class="fas fa-star text-red-800 text-2xl")
+            with div(_class=f"w-16 h-16 {TAILWIND_YELLOW_400} rounded-full flex items-center justify-center mx-auto mb-4"):
+                i(_class=f"fas fa-star {TAILWIND_RED_800} text-2xl")
             h2("Welcome Back", _class=f"text-2xl font-bold {PUP_TEXT_BURGUNDY_CLASS}")
 
         with form(action=url_for('login'), method="post", _class="bg-white rounded-lg shadow-lg p-6"):
@@ -134,15 +148,15 @@ def login_content(_):
                 input_(type="password", name="password", _class="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:border-red-500")
 
             with div(_class="space-y-3"):
-                button("LOGIN", type="submit", _class=f"w-full {PUP_BURGUNDY_CLASS} text-white py-3 rounded-lg font-semibold hover:bg-red-900 transition-colors") # hover:bg-red-900 (from example)
-                button("Create Account", onclick=f"window.location.href='{url_for('register_page')}'", type="button", _class=f"w-full {PUP_TEAL_CLASS} text-white py-3 rounded-lg font-semibold {PUP_TEAL_HOVER_CLASS} transition-colors") # Using Tailwind's cyan-400
+                button("LOGIN", type="submit", _class=f"w-full {PUP_BURGUNDY_CLASS} text-white py-3 rounded-lg font-semibold {TAILWIND_RED_900_HOVER} transition-colors")
+                button("Create Account", onclick=f"window.location.href='{url_for('register_page')}'", type="button", _class=f"w-full {TAILWIND_CYAN_400} text-white py-3 rounded-lg font-semibold {TAILWIND_HOVER_CYAN_500} transition-colors")
 
-# Registration Section (matches Image 1 exactly, with Tailwind)
+# Registration Section (matches Image 1 exactly, with custom classes)
 def registration_content(_):
-    with section(id="register", _class="section p-4"): # Added section wrapping
+    with section(id="register", _class="section p-4"): # Ensure p-4 is on the section
         with div(_class="text-center mb-6"):
-            with div(_class=f"w-16 h-16 {PUP_GOLD_CLASS} rounded-full flex items-center justify-center mx-auto mb-4"): # bg-yellow-400
-                i(_class="fas fa-star text-red-800 text-2xl")
+            with div(_class=f"w-16 h-16 {TAILWIND_YELLOW_400} rounded-full flex items-center justify-center mx-auto mb-4"):
+                i(_class=f"fas fa-star {TAILWIND_RED_800} text-2xl")
             h2("Mula sayo para sa bayan", _class=f"text-2xl font-bold {PUP_TEXT_BURGUNDY_CLASS}")
 
         with form(action=url_for('handle_register'), method="post", _class="bg-white rounded-lg shadow-lg p-6"):
@@ -160,12 +174,10 @@ def registration_content(_):
                 input_(type="password", name="confirm_password", _class="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:border-red-500")
 
             with div(_class="space-y-3"):
-                # Back to Login button (from image 1, styled as button)
-                button("Back to LOGIN", onclick=f"window.location.href='{url_for('login_page')}'", type="button", _class=f"w-full {PUP_TEAL_CLASS} text-white py-3 rounded-lg font-semibold {PUP_TEAL_HOVER_CLASS} transition-colors")
-                button("REGISTER", type="submit", _class=f"w-full {PUP_TEAL_REGISTER_CLASS} text-white py-3 rounded-lg font-semibold {PUP_TEAL_REGISTER_HOVER_CLASS} transition-colors")
+                button("Back to LOGIN", onclick=f"window.location.href='{url_for('login_page')}'", type="button", _class=f"w-full {TAILWIND_CYAN_400} text-white py-3 rounded-lg font-semibold {TAILWIND_HOVER_CYAN_500} transition-colors")
+                button("REGISTER", type="submit", _class=f"w-full {TAILWIND_CYAN_500} text-white py-3 rounded-lg font-semibold {TAILWIND_HOVER_CYAN_600} transition-colors")
         
         # Question Mark button (as per image 1)
-        # Corrected: a(href)(content) syntax
         a(href=url_for('contact_us'), _class="fixed bottom-4 right-4 w-12 h-12 bg-black text-white rounded-full shadow-lg z-40 flex items-center justify-center")(
             i(_class="fas fa-question text-xl")
         )
@@ -173,7 +185,7 @@ def registration_content(_):
 
 # Homepage/Product Listing Section (matches example's homepage)
 def homepage_content(_):
-    with section(id="homepage", _class="section active p-4"): # Added section wrapping
+    with section(id="homepage", _class="section active p-4"): # Ensure p-4 is on the section
         with div(_class="mb-6"):
             h2("Featured Products", _class=f"text-2xl font-bold {PUP_TEXT_BURGUNDY_CLASS} mb-2")
             p("Official PUP merchandise and study essentials", _class="text-gray-600")
@@ -181,7 +193,6 @@ def homepage_content(_):
         # Featured Product (from example)
         with div(_class="bg-white rounded-lg shadow-lg p-4 mb-6"):
             with div(_class="flex items-start space-x-4"):
-                # Placeholder for product image. Replace with actual image.
                 img(src="/static/images/product_lanyard_1.png", _class=f"w-24 h-24 {PUP_BURGUNDY_CLASS} rounded-lg object-cover")
                 with div(_class="flex-1"):
                     h3("PUP STUDY WITH STYLE Baybayin - Classic Edition", _class=f"font-bold {PUP_TEXT_BURGUNDY_CLASS} text-lg")
@@ -189,17 +200,15 @@ def homepage_content(_):
                     with div(_class="flex items-center justify-between"):
                         span("₱140", _class=f"text-2xl font-bold {PUP_TEXT_BURGUNDY_CLASS}")
                         with form(action=url_for('add_to_cart'), method="post", style="display:inline;"):
-                            input_(type="hidden", name="product_id", value="1") # Assuming ID 1 for this lanyard
-                            button("ADD TO CART", type="submit", _class="bg-red-500 hover:bg-red-600 text-white px-6 py-2 rounded-full font-bold transition-colors")
+                            input_(type="hidden", name="product_id", value="1")
+                            button("ADD TO CART", type="submit", _class=f"{TAILWIND_RED_500} {TAILWIND_HOVER_RED_600} text-white px-6 py-2 rounded-full font-bold transition-colors")
 
         # You Might Like Section (from example, using actual products from DB)
         with div(_class="mb-6"):
             h3("You Might Like", _class=f"text-xl font-bold {PUP_TEXT_BURGUNDY_CLASS} mb-4")
             with div(_class="grid grid-cols-1 gap-4"):
-                products = db.get_all_products() # Get all products for "You Might Like"
+                products = db.get_all_products()
                 for product in products:
-                    # Assuming product_id 1 is the main featured product, skip it here.
-                    # If you want to show all, remove this 'if' statement.
                     if product['id'] == 1: continue 
                     
                     with div(_class="bg-white rounded-lg shadow-md p-4 product-card"):
@@ -212,11 +221,11 @@ def homepage_content(_):
                                     span(f"₱{product['price']:.2f}", _class=f"font-bold {PUP_TEXT_BURGUNDY_CLASS}")
                                     with form(action=url_for('add_to_cart'), method="post", style="display:inline;"):
                                         input_(type="hidden", name="product_id", value=str(product['id']))
-                                        button("ADD TO CART", type="submit", _class="bg-red-500 text-white px-4 py-1 rounded-full text-sm")
+                                        button("ADD TO CART", type="submit", _class=f"{TAILWIND_RED_500} text-white px-4 py-1 rounded-full text-sm")
 
 # Product Detail Page (adapted to Tailwind)
 def product_detail_content(product):
-    with section(id="product-detail", _class="section p-4"): # Added section wrapping
+    with section(id="product-detail", _class="section p-4"): # Ensure p-4 is on the section
         if not product:
             h1("Product not found", _class=f"text-2xl font-bold {PUP_TEXT_BURGUNDY_CLASS}")
             return
@@ -244,15 +253,15 @@ def product_detail_content(product):
             with div(_class="flex space-x-4"):
                 with form(action=url_for('add_to_cart'), method="post", _class="flex-1"):
                     input_(type="hidden", name="product_id", value=str(product['id']))
-                    button("ADD TO CART", type="submit", _class="w-full bg-red-500 hover:bg-red-600 text-white py-3 rounded-lg font-bold transition-colors")
-                with form(action=url_for('add_to_cart'), method="post", _class="flex-1"): # For demo, BUY NOW also adds to cart
+                    button("ADD TO CART", type="submit", _class=f"w-full {TAILWIND_RED_500} {TAILWIND_HOVER_RED_600} text-white py-3 rounded-lg font-bold transition-colors")
+                with form(action=url_for('add_to_cart'), method="post", _class="flex-1"):
                     input_(type="hidden", name="product_id", value=str(product['id']))
-                    button("BUY NOW", type="submit", _class=f"w-full {PUP_BURGUNDY_CLASS} hover:bg-red-900 text-white py-3 rounded-lg font-bold transition-colors") # hover:bg-red-900 from example
+                    button("BUY NOW", type="submit", _class=f"w-full {PUP_BURGUNDY_CLASS} {TAILWIND_RED_900_HOVER} text-white py-3 rounded-lg font-bold transition-colors")
 
 
-# Shopping Cart Section (fully functional with Tailwind)
+# Shopping Cart Section (fully functional with custom classes)
 def cart_content(_):
-    with section(id="cart", _class="section p-4"): # Added section wrapping
+    with section(id="cart", _class="section p-4"): # Ensure p-4 is on the section
         h2("Shopping Cart", _class=f"text-2xl font-bold {PUP_TEXT_BURGUNDY_CLASS} mb-4")
         
         with div(_class=f"bg-gradient-to-r from-yellow-400 to-orange-400 rounded-lg p-4 mb-6"):
@@ -274,7 +283,7 @@ def cart_content(_):
                     try:
                         product_id = int(product_id_str)
                     except ValueError:
-                        continue # Skip invalid product_id
+                        continue
                     
                     product = db.get_product_by_id(product_id)
                     if product:
@@ -283,26 +292,23 @@ def cart_content(_):
                         with div(_class="bg-white rounded-lg shadow-md p-4"):
                             with div(_class="flex items-center justify-between"):
                                 with div(_class="flex items-center space-x-3"):
-                                    input_(type="checkbox", checked=True, _class="w-4 h-4 text-red-500")
+                                    input_(type="checkbox", checked=True, _class=f"w-4 h-4 text-red-500")
                                     img(src=product['image_url'], _class=f"w-12 h-12 {PUP_BURGUNDY_CLASS} rounded object-cover flex items-center justify-center text-white")
                                     with div():
                                         h4(product['name'], _class=f"font-semibold {PUP_TEXT_BURGUNDY_CLASS} text-sm")
                                         p(f"₱{product['price']:.2f}", _class="text-gray-600 text-xs")
                                 with div(_class="flex items-center space-x-2"):
-                                    # Corrected: a(href)(content) syntax
                                     a(href=url_for('update_cart_quantity', product_id=product_id, action='decrement'),
                                       _class="w-8 h-8 bg-gray-200 rounded-full flex items-center justify-center text-gray-700 hover:bg-gray-300")(
                                         i(_class="fas fa-minus text-xs")
                                     )
                                     span(str(quantity), _class="w-8 text-center font-semibold")
-                                    # Corrected: a(href)(content) syntax
                                     a(href=url_for('update_cart_quantity', product_id=product_id, action='increment'),
                                       _class="w-8 h-8 bg-gray-200 rounded-full flex items-center justify-center text-gray-700 hover:bg-gray-300")(
                                         i(_class="fas fa-plus text-xs")
                                     )
-                                    # Corrected: a(href)(content) syntax
                                     a(href=url_for('remove_from_cart', product_id=product_id),
-                                      _class="text-red-500 hover:text-red-700 ml-2")(
+                                      _class=f"text-red-500 hover:text-red-700 ml-2")(
                                         i(_class="fas fa-trash-alt text-base")
                                     )
 
@@ -313,15 +319,15 @@ def cart_content(_):
                 span(f"₱{total_price:.2f}", id="cart-total")
 
         button("CHECK OUT", onclick="alert('Checkout functionality is a work in progress!');",
-            _class=f"w-full {PUP_BURGUNDY_CLASS} text-white py-4 rounded-lg font-bold text-lg {'hidden' if not cart_items else ''}")
+           _class=f"w-full {PUP_BURGUNDY_CLASS} text-white py-4 rounded-lg font-bold text-lg {'hidden' if not cart_items else ''}")
 
 
 # Contact Section (matches example's contact section)
 def contact_us_content(_):
-    with section(id="contact", _class="section p-4"): # Added section wrapping
+    with section(id="contact", _class="section p-4"): # Ensure p-4 is on the section
         with div(_class="text-center mb-6"):
-            with div(_class=f"w-16 h-16 {PUP_GOLD_CLASS} rounded-full flex items-center justify-center mx-auto mb-4"): # bg-yellow-400
-                i(_class="fas fa-star text-red-800 text-2xl")
+            with div(_class=f"w-16 h-16 {TAILWIND_YELLOW_400} rounded-full flex items-center justify-center mx-auto mb-4"):
+                i(_class=f"fas fa-star {TAILWIND_RED_800} text-2xl")
             h2("Contact Us", _class=f"text-2xl font-bold {PUP_TEXT_BURGUNDY_CLASS}")
 
         with form(action=url_for('handle_feedback'), method="post", _class="bg-white rounded-lg shadow-lg p-6"):
@@ -341,10 +347,9 @@ def contact_us_content(_):
 
 # Profile Section (matches example's profile section)
 def profile_content(_):
-    with section(id="profile", _class="section p-4"): # Added section wrapping
+    with section(id="profile", _class="section p-4"): # Ensure p-4 is on the section
         with div(_class="text-center mb-6"):
             with div(_class="w-20 h-20 bg-gray-300 rounded-full flex items-center justify-center mx-auto mb-4"):
-                # Ensure you have assets/images/user_icon.png or change this icon
                 img(src="/static/images/user_icon.png", _class="w-full h-full object-cover rounded-full")
             h2(session.get('user_name', 'Guest'), _class=f"text-2xl font-bold {PUP_TEXT_BURGUNDY_CLASS}")
 
@@ -372,7 +377,7 @@ def profile_content(_):
 
 # Order History Section (adapted to Tailwind)
 def order_history_content(_):
-    with section(id="order-history", _class="section p-4"): # Added section wrapping
+    with section(id="order-history", _class="section p-4"): # Ensure p-4 is on the section
         h1("Order History", _class=f"text-2xl font-bold {PUP_TEXT_BURGUNDY_CLASS} mb-4")
         
         with div(_class="bg-white rounded-lg shadow-lg p-6"):

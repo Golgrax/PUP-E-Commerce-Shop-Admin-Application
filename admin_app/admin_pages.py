@@ -11,10 +11,14 @@ static_folder_path = os.path.abspath(os.path.join(os.path.dirname(__file__), '..
 app = Flask(__name__, static_folder=static_folder_path, static_url_path='/static')
 app.secret_key = 'another-secret-key-for-admin-app-change-me' # Add a secret key for flash messages
 
-# Constants for PUP Colors (Used in Python for clarity, translated to custom CSS classes)
+# --- Constants for CSS Class Names (Used to reference classes from style.css) ---
 PUP_BURGUNDY_CLASS = 'pup-bg-burgundy'
 PUP_GOLD_CLASS = 'pup-bg-gold'
-PUP_DARK_BURGUNDY_CLASS = 'pup-dark-burgundy'
+PUP_TEXT_BURGUNDY_CLASS = 'pup-text-burgundy'
+
+# Specific Tailwind classes from example HTML, now defined or mapped in style.css
+TAILWIND_RED_800 = 'text-red-800'
+PUP_DARK_BURGUNDY_HOVER_CLASS = 'hover:bg-red-900' # A custom hover class for admin buttons
 
 
 def create_admin_page(page_title, content_func):
@@ -24,9 +28,8 @@ def create_admin_page(page_title, content_func):
         meta(name="viewport", content="width=device-width, initial-scale=1.0")
         link(rel="stylesheet", href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css")
         link(rel="stylesheet", href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.4.0/css/all.min.css")
-        link(rel="stylesheet", href="/static/css/style.css") # For custom font and variables, and custom PUP color classes
+        link(rel="stylesheet", href="/static/css/style.css") # For custom font and classes
     
-    # Apply body classes directly to the body tag object
     doc.body._class = "bg-gray-50 font-sans"
     with doc.body:
         with div(_class="container mx-auto p-4 max-w-4xl"):
@@ -34,7 +37,7 @@ def create_admin_page(page_title, content_func):
             with header(_class=f"{PUP_BURGUNDY_CLASS} text-white p-4 shadow-lg flex items-center justify-between mb-6"):
                 with div(_class="flex items-center space-x-3"):
                     with div(_class=f"w-8 h-8 {PUP_GOLD_CLASS} rounded-full flex items-center justify-center"):
-                        i(_class="fas fa-tools text-red-800")
+                        i(_class=f"fas fa-tools {TAILWIND_RED_800}")
                     h1(page_title, _class="text-xl font-bold")
                 with nav():
                     with ul(_class="flex"):
@@ -69,7 +72,7 @@ def inventory_management_content():
                 input_(type="text", name="price", id="price", required=True, placeholder="e.g., 150.00", _class="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:border-blue-500")
         
         with div(_class="flex flex-wrap justify-center gap-4"):
-            button("Add Item", name="action", value="add", type="submit", _class=f"flex-1 min-w-[120px] {PUP_BURGUNDY_CLASS} text-white py-3 rounded-lg font-semibold hover:bg-[{PUP_DARK_BURGUNDY_CLASS}] transition-colors")
+            button("Add Item", name="action", value="add", type="submit", _class=f"flex-1 min-w-[120px] {PUP_BURGUNDY_CLASS} text-white py-3 rounded-lg font-semibold {PUP_DARK_BURGUNDY_HOVER_CLASS} transition-colors")
             button("Update Item", name="action", value="update", type="submit", _class="flex-1 min-w-[120px] bg-blue-500 text-white py-3 rounded-lg font-semibold hover:bg-blue-600 transition-colors")
             button("Delete Item", name="action", value="delete", type="submit", _class="flex-1 min-w-[120px] bg-red-500 text-white py-3 rounded-lg font-semibold hover:bg-red-600 transition-colors")
         
