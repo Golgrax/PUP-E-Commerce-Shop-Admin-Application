@@ -1,3 +1,5 @@
+# shared/database.py
+
 import mysql.connector
 from mysql.connector import errorcode
 import hashlib
@@ -10,9 +12,14 @@ DB_CONFIG = {
 }
 DB_NAME = 'pup_shop_db'
 
-# --- Hashing Utility ---
+# --- Hashing Utilities ---
 def hash_password(password):
+    """Hashes a password for storing."""
     return hashlib.sha256(password.encode()).hexdigest()
+
+def check_password(hashed_password, user_password):
+    """Checks a plain-text password against a hashed one."""
+    return hashed_password == hashlib.sha256(user_password.encode()).hexdigest()
 
 # --- Database Setup ---
 def create_connection():
@@ -42,7 +49,6 @@ def setup_database():
     
     cnx.close()
 
-    # Reconnect with the database selected
     db_cnx = mysql.connector.connect(**DB_CONFIG)
     cursor = db_cnx.cursor()
 
@@ -71,8 +77,6 @@ def setup_database():
         "  PRIMARY KEY (`id`)"
         ") ENGINE=InnoDB")
     
-    # ... Add other table creation SQL here (Orders, OrderItems, CartItems, etc.)
-
     for table_name in tables:
         table_description = tables[table_name]
         try:
@@ -85,7 +89,6 @@ def setup_database():
             else:
                 print(err.msg)
 
-    # Check if products table is empty before inserting
     cursor.execute("SELECT COUNT(*) FROM products")
     if cursor.fetchone()[0] == 0:
         print("Inserting placeholder products...")
@@ -108,12 +111,8 @@ def setup_database():
     db_cnx.close()
 
 # --- CRUD Operations ---
-# (A selection of required functions. A full app would have more.)
-
 def get_db_connection():
-    """Gets a connection to the specified database."""
     try:
-        # Ensure DB_NAME is set in the config
         if 'database' not in DB_CONFIG:
             DB_CONFIG['database'] = DB_NAME
         cnx = mysql.connector.connect(**DB_CONFIG)
@@ -142,63 +141,10 @@ def get_product_by_id(product_id):
     conn.close()
     return product
 
-def add_product(name, quantity, price):
-    conn = get_db_connection()
-    if not conn: return False
-    cursor = conn.cursor()
-    # Using a placeholder image for newly added items
-    image_url = '/static/images/pup_logo.png' 
-    description = 'Newly added item.'
-    try:
-        cursor.execute(
-            "INSERT INTO products (name, stock, price, image_url, description) VALUES (%s, %s, %s, %s, %s)",
-            (name, quantity, price, image_url, description)
-        )
-        conn.commit()
-        return True
-    except mysql.connector.Error as err:
-        print(f"Failed to add product: {err}")
-        return False
-    finally:
-        cursor.close()
-        conn.close()
-
-def update_product(product_id, name, quantity, price):
-    conn = get_db_connection()
-    if not conn: return False
-    cursor = conn.cursor()
-    try:
-        cursor.execute(
-            "UPDATE products SET name = %s, stock = %s, price = %s WHERE id = %s",
-            (name, quantity, price, product_id)
-        )
-        conn.commit()
-        return True
-    except mysql.connector.Error as err:
-        print(f"Failed to update product: {err}")
-        return False
-    finally:
-        cursor.close()
-        conn.close()
-
-def delete_product(product_id):
-    conn = get_db_connection()
-    if not conn: return False
-    cursor = conn.cursor()
-    try:
-        cursor.execute("DELETE FROM products WHERE id = %s", (product_id,))
-        conn.commit()
-        return True
-    except mysql.connector.Error as err:
-        print(f"Failed to delete product: {err}")
-        return False
-    finally:
-        cursor.close()
-        conn.close()
-
 def create_user(name, email, password):
+    # (Existing function is fine)
     conn = get_db_connection()
-    if not conn: return False
+    if not conn: return False, "Database connection failed"
     cursor = conn.cursor()
     hashed_pw = hash_password(password)
     try:
@@ -207,10 +153,22 @@ def create_user(name, email, password):
             (name, email, hashed_pw)
         )
         conn.commit()
-        return True
+        return True, "User created successfully"
     except mysql.connector.Error as err:
         print(f"Error creating user: {err}")
-        return False
+        return False, str(err)
     finally:
         cursor.close()
         conn.close()
+
+# --- NEW FUNCTIONS FOR LOGIN ---
+def get_user_by_email(email):
+    """Fetches a user by their email address."""
+    conn = get_db_connection()
+    if not conn: return None
+    cursor = conn.cursor(dictionary=True)
+    cursor.execute("SELECT * FROM users WHERE email = %s", (email,))
+    user = cursor.fetchone()
+    cursor.close()
+    conn.close()
+    return user

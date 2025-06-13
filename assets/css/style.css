@@ -1,3 +1,5 @@
+/* assets/css/style.css */
+
 @font-face {
     font-family: 'RocaOne';
     src: url('/static/fonts/RocaOne-Bold.ttf') format('truetype');
@@ -20,6 +22,31 @@ body {
     padding-bottom: 80px; /* Space for fixed bottom nav */
 }
 
+/* --- NEW: Navigation Elements --- */
+.top-nav {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 15px;
+}
+
+.back-button {
+    font-size: 14px;
+    color: #007bff;
+    text-decoration: none;
+    font-weight: bold;
+}
+
+.user-info {
+    font-size: 14px;
+    text-align: right;
+}
+
+.user-info a {
+    color: #8c1515; /* PUP Maroon */
+    margin-left: 10px;
+}
+
 /* --- General --- */
 .logo {
     width: 100px;
@@ -37,6 +64,14 @@ a {
 }
 
 /* --- Forms & Buttons --- */
+.form-container {
+    background-color: white;
+    padding: 20px;
+    border-radius: 8px;
+    margin-bottom: 20px;
+    border: 1px solid #eee;
+}
+
 input[type="text"],
 input[type="email"],
 input[type="password"],
@@ -105,6 +140,7 @@ textarea {
     margin-bottom: 15px;
     border-bottom: 1px solid #eee;
     padding-bottom: 15px;
+    text-align: left;
 }
 
 .cart-item img {
@@ -116,7 +152,11 @@ textarea {
 
 .cart-item-details {
     flex-grow: 1;
-    text-align: left;
+}
+
+.cart-item-details a {
+    color: #ff5722;
+    font-size: 12px;
 }
 
 .quantity-control {
@@ -130,23 +170,4 @@ textarea {
     margin: 0 5px;
     text-decoration: none;
     color: #4a4a4a;
-}
-
-
-/* --- Admin Table --- */
-.admin-table {
-    width: 100%;
-    border-collapse: collapse;
-    margin-top: 20px;
-}
-
-.admin-table th, .admin-table td {
-    border: 1px solid #ddd;
-    padding: 8px;
-    text-align: left;
-}
-
-.admin-table th {
-    background-color: #8c1515;
-    color: white;
 }
