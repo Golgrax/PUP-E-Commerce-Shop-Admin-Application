@@ -54,7 +54,7 @@ def create_base_page(page_title, content_func, current_nav_item=None, show_heade
                             p("PUP Official Store", _class="text-xs opacity-90")
                     with div(_class="flex space-x-3"):
                         with div(_class="relative"):
-                            # FIX: Removed colon here
+                            # FIX: Removed colon. Pass i tag as argument to a()
                             a(href=url_for('cart'), _class="p-2 bg-black bg-opacity-20 rounded-full")(
                                 i(_class="fas fa-shopping-cart")
                             )
@@ -64,7 +64,7 @@ def create_base_page(page_title, content_func, current_nav_item=None, show_heade
                                 span(str(total_cart_items), id="cart-badge", _class="cart-badge")
                             else:
                                 span(str(total_cart_items), id="cart-badge", _class="cart-badge", style="display: none;")
-                        # FIX: Removed colon here
+                        # FIX: Removed colon. Pass i tag as argument to a()
                         a(href=url_for('profile'), _class="p-2 bg-black bg-opacity-20 rounded-full")(
                             i(_class="fas fa-user")
                         )
@@ -99,7 +99,7 @@ def create_base_page(page_title, content_func, current_nav_item=None, show_heade
         
         # Help Button (fixed position, from example)
         if show_header_nav:
-            # FIX: Removed colon here
+            # FIX: Removed colon. Pass i tag as argument to a()
             a(href=url_for('contact_us'), _class="fixed bottom-24 right-4 w-12 h-12 bg-black text-white rounded-full shadow-lg z-40 flex items-center justify-center")(
                 i(_class="fas fa-question")
             )
@@ -153,7 +153,7 @@ def registration_content(_):
             button("REGISTER", type="submit", _class=f"w-full bg-[{PUP_TEAL}] text-white py-3 rounded-lg font-semibold hover:bg-cyan-600 transition-colors")
     
     # Question Mark button (as per image 1)
-    # FIX: Removed colon here
+    # FIX: Removed colon. Pass i tag as argument to a()
     a(href=url_for('contact_us'), _class="fixed bottom-4 right-4 w-12 h-12 bg-black text-white rounded-full shadow-lg z-40 flex items-center justify-center")(
         i(_class="fas fa-question text-xl")
     )
@@ -185,7 +185,6 @@ def homepage_content(_):
             products = db.get_all_products() # Get all products for "You Might Like"
             for product in products:
                 # Assuming product_id 1 is the main featured product, skip it here.
-                # If you want to show all, remove this 'if' statement.
                 if product['id'] == 1: continue 
                 
                 with div(_class="bg-white rounded-lg shadow-md p-4 product-card"):
@@ -220,8 +219,8 @@ def product_detail_content(product):
 
         if product.get('variations'):
             with div(_class="mb-6"):
-                label("Select Variation:", _class="block text-gray-700 font-semibold mb-2", _for="variation") # Added _for
-                select_tag = select(name="variation", id="variation", _class="w-full p-2 border border-gray-300 rounded-lg") # Added id
+                label("Select Variation:", _class="block text-gray-700 font-semibold mb-2", _for="variation")
+                select_tag = select(name="variation", id="variation", _class="w-full p-2 border border-gray-300 rounded-lg")
                 with select_tag:
                     for var in product['variations'].split(','):
                         option(var, value=var)
@@ -272,17 +271,22 @@ def cart_content(_):
                                     h4(product['name'], _class=f"font-semibold text-[{PUP_BURGUNDY}] text-sm")
                                     p(f"₱{product['price']:.2f}", _class="text-gray-600 text-xs")
                             with div(_class="flex items-center space-x-2"):
-                                # FIX: Added specific classes for button-like appearance of +/- links
+                                # FIX: Removed colon. Pass i tag as argument to a()
                                 a(href=url_for('update_cart_quantity', product_id=product_id, action='decrement'),
-                                  _class="w-8 h-8 bg-gray-200 rounded-full flex items-center justify-center text-gray-700 hover:bg-gray-300"):
+                                  _class="w-8 h-8 bg-gray-200 rounded-full flex items-center justify-center text-gray-700 hover:bg-gray-300")(
                                     i(_class="fas fa-minus text-xs")
+                                )
                                 span(str(quantity), _class="w-8 text-center font-semibold")
+                                # FIX: Removed colon. Pass i tag as argument to a()
                                 a(href=url_for('update_cart_quantity', product_id=product_id, action='increment'),
-                                  _class="w-8 h-8 bg-gray-200 rounded-full flex items-center justify-center text-gray-700 hover:bg-gray-300"):
+                                  _class="w-8 h-8 bg-gray-200 rounded-full flex items-center justify-center text-gray-700 hover:bg-gray-300")(
                                     i(_class="fas fa-plus text-xs")
+                                )
+                                # FIX: Removed colon. Pass i tag as argument to a()
                                 a(href=url_for('remove_from_cart', product_id=product_id),
-                                  _class="text-red-500 hover:text-red-700 ml-2"):
+                                  _class="text-red-500 hover:text-red-700 ml-2")(
                                     i(_class="fas fa-trash-alt text-base")
+                                )
 
     # Cart Summary
     with div(id="cart-summary", _class="bg-white rounded-lg shadow-lg p-4 mb-6" if cart_items else "hidden"):
@@ -320,25 +324,20 @@ def contact_us_content(_):
 def profile_content(_):
     with div(_class="text-center mb-6"):
         with div(_class="w-20 h-20 bg-gray-300 rounded-full flex items-center justify-center mx-auto mb-4"):
-            # Ensure you have assets/images/user_icon.png or change this icon
             img(src="/static/images/user_icon.png", _class="w-full h-full object-cover rounded-full")
         h2(session.get('user_name', 'Guest'), _class=f"text-2xl font-bold text-[{PUP_BURGUNDY}]")
 
     with div(_class="bg-white rounded-lg shadow-lg p-6 mb-6"):
         with div(_class="space-y-4"):
-            # Link to Account Settings (placeholder for now)
             with a(href="#", _class="flex items-center justify-between p-3 border-b hover:bg-gray-50"):
                 span("Account Settings", _class="font-semibold")
                 i(_class="fas fa-chevron-right text-gray-400")
-            # Link to Order History
             with a(href=url_for('order_history'), _class="flex items-center justify-between p-3 border-b hover:bg-gray-50"):
                 span("Order History", _class="font-semibold")
                 i(_class="fas fa-chevron-right text-gray-400")
-            # Link to Favorites (placeholder for now)
             with a(href="#", _class="flex items-center justify-between p-3 border-b hover:bg-gray-50"):
                 span("Favorites", _class="font-semibold")
                 i(_class="fas fa-chevron-right text-gray-400")
-            # Link to Help & Support (Contact Us page)
             with a(href=url_for('contact_us'), _class="flex items-center justify-between p-3 hover:bg-gray-50"):
                 span("Help & Support", _class="font-semibold")
                 i(_class="fas fa-chevron-right text-gray-400")

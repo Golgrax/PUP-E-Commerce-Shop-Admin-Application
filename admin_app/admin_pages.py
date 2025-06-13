@@ -36,11 +36,9 @@ def create_admin_page(page_title, content_func):
                         i(_class="fas fa-tools text-red-800")
                     h1(page_title, _class="text-xl font-bold")
                 with nav():
-                    ul(
-                        li(a("Inventory", href=url_for('admin_dashboard'), _class="text-white hover:text-gray-200 mx-2")),
-                        li(a("Orders (WIP)", href="#", _class="text-white hover:text-gray-200 mx-2")),
-                        _class="flex"
-                    )
+                    with ul(_class="flex"): # FIX: Added 'with' for ul for consistency, changed cls to _class
+                        li(a("Inventory", href=url_for('admin_dashboard'), _class="text-white hover:text-gray-200 mx-2"))
+                        li(a("Orders (WIP)", href="#", _class="text-white hover:text-gray-200 mx-2"))
 
             # Flash messages
             for category, message in get_flashed_messages(with_categories=True):
