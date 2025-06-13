@@ -1,15 +1,15 @@
 # shop_app/web_pages.py
 
-import os
-from flask import Flask, send_from_directory, render_template_string, request, redirect, url_for
+import os  # <-- Make sure os is imported
+from flask import Flask, request, redirect, url_for
 import dominate
 from dominate.tags import *
 from shared import database as db
 
-# --- Flask App Initialization (CORRECTED) ---
-# When running as a module from the project root, 'assets' is a top-level directory.
-# This is a simpler and more reliable way to set the path.
-app = Flask(__name__, static_folder='assets', static_url_path='/static')
+# --- Flask App Initialization (CORRECTED AND FINAL) ---
+# Create an absolute path from this file's location to the parent directory's 'assets' folder
+static_folder_path = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', 'assets'))
+app = Flask(__name__, static_folder=static_folder_path, static_url_path='/static')
 
 
 # Base page structure to avoid repetition
@@ -53,12 +53,10 @@ def homepage_content(_):
 
     products = db.get_all_products()
     with div(cls="product-grid"):
-        # --- FIX: Changed loop variable from 'p' to 'product' ---
         for product in products:
             with a(href=url_for('product_detail', product_id=product['id']), cls="product-item"):
                 img(src=product['image_url'])
                 h3(product['name'])
-                # Now using the 'dominate' p tag, not the dictionary
                 p(f"₱{product['price']:.2f}")
 
 def product_detail_content(product):
