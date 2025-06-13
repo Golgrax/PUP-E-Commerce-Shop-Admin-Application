@@ -4,37 +4,155 @@ import os
 from flask import Flask, request, redirect, url_for, session, flash, get_flashed_messages
 import dominate
 from dominate.tags import *
-from functools import wraps # Correct import for decorators
+from functools import wraps
 
 from shared import database as db
 
 # --- Flask App Initialization ---
 static_folder_path = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', 'assets'))
 app = Flask(__name__, static_folder=static_folder_path, static_url_path='/static')
-app.secret_key = 'a-super-secret-key-for-development-change-me' # REQUIRED for sessions and flash messages
+app.secret_key = 'a-super-secret-key-for-development-change-me' 
 
-# --- Constants for CSS Class Names (Used to reference classes from style.css) ---
-PUP_BURGUNDY_CLASS = 'pup-bg-burgundy'
-PUP_GOLD_CLASS = 'pup-bg-gold'
-PUP_TEXT_BURGUNDY_CLASS = 'pup-text-burgundy'
-PUP_BORDER_BURGUNDY_CLASS = 'pup-border-burgundy'
+# --- CSS Stylesheets (NOW INLINED DIRECTLY IN HTML) ---
+# This string will contain ALL the CSS.
+# User MUST populate this with content from Tailwind and Font Awesome CDNs.
+FULL_INLINE_CSS = """
+/*
+   -- User Action Required --
+   1. Copy the MINIFIED content of https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css
+      and paste it here at the beginning of this string.
+   2. Copy the MINIFIED content of https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.4.0/css/all.min.css
+      and paste it immediately after the Tailwind CSS content.
+   3. Then, paste the custom styles (from your previous style.css) below this comment block.
+*/
 
-# Specific Tailwind classes from example HTML, now defined or mapped in style.css
-# These are the actual string classes used in _class=""
-TAILWIND_YELLOW_400 = 'bg-yellow-400' # Mapped to pup-gold in style.css
-TAILWIND_RED_800 = 'text-red-800'
-TAILWIND_RED_500 = 'bg-red-500'
-TAILWIND_HOVER_RED_600 = 'hover:bg-red-600'
-TAILWIND_RED_900_HOVER = 'hover:bg-red-900'
-TAILWIND_CYAN_400 = 'bg-cyan-400'
-TAILWIND_HOVER_CYAN_500 = 'hover:bg-cyan-500'
-TAILWIND_CYAN_500 = 'bg-cyan-500'
-TAILWIND_HOVER_CYAN_600 = 'hover:bg-cyan-600'
+/* Custom Font */
+@font-face {
+    font-family: 'RocaOne';
+    src: url('/static/fonts/RocaOne-Bold.ttf') format('truetype');
+    font-weight: bold;
+    font-style: normal;
+}
 
+/* Custom CSS variables for PUP colors */
+:root {
+    --pup-burgundy: #722F37;
+    --pup-gold: #FFD700;
+    --pup-dark-burgundy: #5A252A;
+    --pup-teal-400: #4FD1C5; /* Corresponds to Tailwind cyan-400 */
+    --pup-teal-500: #00BCD4; /* Corresponds to Tailwind cyan-500 from your example */
+    --pup-red-500: #EF4444; /* Corresponds to Tailwind red-500 */
+    --pup-red-600: #DC2626; /* Corresponds to Tailwind red-600 */
+    --pup-red-800: #991B1B; /* Corresponds to Tailwind red-800 from your example */
+    --pup-red-900: #7F1D1D; /* Corresponds to Tailwind red-900 from your example */
+}
+
+/* Custom classes using CSS variables for colors */
+.pup-bg-burgundy { background-color: var(--pup-burgundy); }
+.pup-bg-gold { background-color: var(--pup-gold); }
+.pup-text-burgundy { color: var(--pup-burgundy); }
+.pup-text-gold { color: var(--pup-gold); }
+.pup-border-burgundy { border-color: var(--pup-burgundy); }
+
+/* Tailwind-like classes for specific colors used in example, now defined in custom CSS */
+.bg-yellow-400 { background-color: var(--pup-gold); }
+.text-red-800 { color: var(--pup-red-800); }
+.bg-red-500 { background-color: var(--pup-red-500); }
+.hover\\:bg-red-600:hover { background-color: var(--pup-red-600); } /* Escaped colon for direct class usage */
+.bg-cyan-400 { background-color: var(--pup-teal-400); }
+.hover\\:bg-cyan-500:hover { background-color: var(--pup-teal-500); } /* Escaped colon */
+.bg-cyan-500 { background-color: var(--pup-teal-500); }
+.hover\\:bg-cyan-600:hover { background-color: #008C99; } /* Escaped colon */
+.hover\\:bg-red-900:hover { background-color: var(--pup-red-900); } /* Escaped colon */
+
+/* General Tailwind-like classes from example HTML for consistency */
+.flex { display: flex; }
+.items-center { align-items: center; }
+.justify-between { justify-content: space-between; }
+.space-x-3 > *:not(:first-child) { margin-left: 0.75rem; } /* Tailwind space-x-3 */
+.space-x-4 > *:not(:first-child) { margin-left: 1rem; } /* Tailwind space-x-4 */
+.space-y-1 > *:not(:first-child) { margin-top: 0.25rem; } /* Tailwind space-y-1 */
+.space-y-3 > *:not(:first-child) { margin-top: 0.75rem; } /* Tailwind space-y-3 */
+.space-y-4 > *:not(:first-child) { margin-top: 1rem; } /* Tailwind space-y-4 */
+.rounded-full { border-radius: 9999px; }
+.rounded-lg { border-radius: 0.5rem; }
+.shadow-lg { box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05); }
+.text-white { color: white; }
+.p-4 { padding: 1rem; }
+.w-10 { width: 2.5rem; } .h-10 { height: 2.5rem; }
+.w-16 { width: 4rem; } .h-16 { height: 4rem; }
+.w-20 { width: 5rem; } .h-20 { height: 5rem; }
+.w-24 { width: 6rem; } .h-24 { height: 6rem; }
+.opacity-90 { opacity: 0.9; }
+.text-lg { font-size: 1.125rem; line-height: 1.75rem; }
+.text-xl { font-size: 1.25rem; line-height: 1.75rem; }
+.text-2xl { font-size: 1.5rem; line-height: 2rem; }
+.text-3xl { font-size: 1.875rem; line-height: 2.25rem; }
+.text-xs { font-size: 0.75rem; line-height: 1rem; }
+.text-sm { font-size: 0.875rem; line-height: 1.25rem; }
+.font-bold { font-weight: 700; }
+.font-semibold { font-weight: 600; }
+.mx-auto { margin-left: auto; margin-right: auto; }
+.mb-2 { margin-bottom: 0.5rem; }
+.mb-4 { margin-bottom: 1rem; }
+.mb-6 { margin-bottom: 1.5rem; }
+.py-3 { padding-top: 0.75rem; padding-bottom: 0.75rem; }
+.py-4 { padding-top: 1rem; padding-bottom: 1rem; }
+.px-4 { padding-left: 1rem; padding-right: 1rem; }
+.px-6 { padding-left: 1.5rem; padding-right: 1.5rem; }
+.border { border-width: 1px; }
+.border-gray-300 { border-color: #D1D5DB; } /* Tailwind gray-300 */
+.focus\\:outline-none:focus { outline: 2px solid transparent; outline-offset: 2px; } /* Focus outline */
+.focus\\:border-red-500:focus { border-color: var(--pup-red-500); } /* Focus border */
+.w-full { width: 100%; }
+.block { display: block; }
+.resize-none { resize: none; }
+.object-cover { object-fit: cover; }
+.max-h-64 { max-height: 16rem; } /* Tailwind max-h-64 */
+.text-gray-500 { color: #6B7280; }
+.text-gray-600 { color: #4B5563; }
+.text-gray-700 { color: #374151; }
+.text-gray-900 { color: #111827; }
+.text-red-500 { color: var(--pup-red-500); }
+.hover\\:text-red-700:hover { color: #B91C1C; } /* Tailwind red-700 */
+.ml-2 { margin-left: 0.5rem; }
+.bg-gray-200 { background-color: #E5E7EB; }
+.hover\\:bg-gray-300:hover { background-color: #D1D5DB; }
+.w-8 { width: 2rem; } .h-8 { height: 2rem; }
+.min-w-full { min-width: 100%; }
+.divide-y > :not([hidden]) ~ :not([hidden]) { border-top-width: 1px; border-color: #E5E7EB; } /* Tailwind divide-y */
+.divide-gray-200 { border-color: #E5E7EB; }
+.whitespace-nowrap { white-space: nowrap; }
+.uppercase { text-transform: uppercase; }
+.tracking-wider { letter-spacing: 0.05em; }
+.px-4 { padding-left: 1rem; padding-right: 1rem; }
+.py-2 { padding-top: 0.5rem; padding-bottom: 0.5rem; }
+.text-left { text-align: left; }
+.text-green-600 { color: #16A34A; }
+.text-blue-600 { color: #2563EB; }
+.text-red-600 { color: var(--pup-red-600); }
+.fixed { position: fixed; }
+.bottom-0 { bottom: 0; }
+.left-0 { left: 0; }
+.right-0 { right: 0; }
+.bottom-24 { bottom: 6rem; }
+.right-4 { right: 1rem; }
+.w-12 { width: 3rem; } .h-12 { height: 3rem; }
+.bg-black { background-color: #000; }
+.shadow-lg { box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05); }
+.z-40 { z-index: 40; } .z-50 { z-index: 50; }
+.relative { position: relative; }
+.top-20 { top: 5rem; }
+
+/*
+   -- User Action Required --
+   End of custom styles.
+*/
+"""
 
 # --- Login Required Decorator ---
 def login_required(f):
-    @wraps(f) # Important for preserving original function metadata
+    @wraps(f) 
     def decorated_function(*args, **kwargs):
         if 'user_id' not in session:
             flash('Please log in to access this page.', 'error')
@@ -42,15 +160,13 @@ def login_required(f):
         return f(*args, **kwargs)
     return decorated_function
 
-# --- Base Page Structure (with Tailwind/Font Awesome Header and Nav) ---
+# --- Base Page Structure (with Inline CSS, Header, and Nav) ---
 def create_base_page(page_title, content_func, current_nav_item=None, show_header_nav=True):
     doc = dominate.document(title=f"PUP Mobile Store - {page_title}")
     with doc.head:
         meta(charset="UTF-8")
         meta(name="viewport", content="width=device-width, initial-scale=1.0")
-        link(rel="stylesheet", href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css")
-        link(rel="stylesheet", href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.4.0/css/all.min.css")
-        link(rel="stylesheet", href="/static/css/style.css") # For custom font and classes
+        style(FULL_INLINE_CSS) # FIX: Inline all CSS here
 
     doc.body._class = "bg-gray-50 font-sans"
     with doc.body:
@@ -110,26 +226,10 @@ def create_base_page(page_title, content_func, current_nav_item=None, show_heade
             a(href=url_for('contact_us'), _class="fixed bottom-24 right-4 w-12 h-12 bg-black text-white rounded-full shadow-lg z-40 flex items-center justify-center")(
                 i(_class="fas fa-question")
             )
-        
-        # This script helps tkinterweb refresh the view correctly after a Flask redirect
-        # It explicitly tells the HtmlFrame to reload the current URL.
-        script_content = f"""
-        document.addEventListener('DOMContentLoaded', function() {{
-            // This is a client-side workaround for tkinterweb not always reloading after server redirects
-            // It makes the page reload if the URL has changed without a full page load.
-            const currentFlaskUrl = window.location.href;
-            if (window.top && window.top.tkinterweb_frame) {{
-                // This line is a custom event that TkinterWeb might pick up
-                // (though a direct reload is more reliable for simple Flask apps)
-                window.top.tkinterweb_frame.load_url(currentFlaskUrl);
-            }}
-        }});
-        """
-        script(script_content)
 
     return doc.render()
 
-# --- Page Content Generators (Adapted to Tailwind CSS and custom classes) ---
+# --- Page Content Generators ---
 
 # Login Section (matches example's login section)
 def login_content(_):
@@ -153,7 +253,7 @@ def login_content(_):
 
 # Registration Section (matches Image 1 exactly, with custom classes)
 def registration_content(_):
-    with section(id="register", _class="section p-4"): # Ensure p-4 is on the section
+    with section(id="register", _class="section p-4"):
         with div(_class="text-center mb-6"):
             with div(_class=f"w-16 h-16 {TAILWIND_YELLOW_400} rounded-full flex items-center justify-center mx-auto mb-4"):
                 i(_class=f"fas fa-star {TAILWIND_RED_800} text-2xl")
@@ -177,7 +277,6 @@ def registration_content(_):
                 button("Back to LOGIN", onclick=f"window.location.href='{url_for('login_page')}'", type="button", _class=f"w-full {TAILWIND_CYAN_400} text-white py-3 rounded-lg font-semibold {TAILWIND_HOVER_CYAN_500} transition-colors")
                 button("REGISTER", type="submit", _class=f"w-full {TAILWIND_CYAN_500} text-white py-3 rounded-lg font-semibold {TAILWIND_HOVER_CYAN_600} transition-colors")
         
-        # Question Mark button (as per image 1)
         a(href=url_for('contact_us'), _class="fixed bottom-4 right-4 w-12 h-12 bg-black text-white rounded-full shadow-lg z-40 flex items-center justify-center")(
             i(_class="fas fa-question text-xl")
         )
@@ -185,12 +284,11 @@ def registration_content(_):
 
 # Homepage/Product Listing Section (matches example's homepage)
 def homepage_content(_):
-    with section(id="homepage", _class="section active p-4"): # Ensure p-4 is on the section
+    with section(id="homepage", _class="section active p-4"):
         with div(_class="mb-6"):
             h2("Featured Products", _class=f"text-2xl font-bold {PUP_TEXT_BURGUNDY_CLASS} mb-2")
             p("Official PUP merchandise and study essentials", _class="text-gray-600")
 
-        # Featured Product (from example)
         with div(_class="bg-white rounded-lg shadow-lg p-4 mb-6"):
             with div(_class="flex items-start space-x-4"):
                 img(src="/static/images/product_lanyard_1.png", _class=f"w-24 h-24 {PUP_BURGUNDY_CLASS} rounded-lg object-cover")
@@ -203,7 +301,6 @@ def homepage_content(_):
                             input_(type="hidden", name="product_id", value="1")
                             button("ADD TO CART", type="submit", _class=f"{TAILWIND_RED_500} {TAILWIND_HOVER_RED_600} text-white px-6 py-2 rounded-full font-bold transition-colors")
 
-        # You Might Like Section (from example, using actual products from DB)
         with div(_class="mb-6"):
             h3("You Might Like", _class=f"text-xl font-bold {PUP_TEXT_BURGUNDY_CLASS} mb-4")
             with div(_class="grid grid-cols-1 gap-4"):
@@ -225,7 +322,7 @@ def homepage_content(_):
 
 # Product Detail Page (adapted to Tailwind)
 def product_detail_content(product):
-    with section(id="product-detail", _class="section p-4"): # Ensure p-4 is on the section
+    with section(id="product-detail", _class="section p-4"):
         if not product:
             h1("Product not found", _class=f"text-2xl font-bold {PUP_TEXT_BURGUNDY_CLASS}")
             return
@@ -261,7 +358,7 @@ def product_detail_content(product):
 
 # Shopping Cart Section (fully functional with custom classes)
 def cart_content(_):
-    with section(id="cart", _class="section p-4"): # Ensure p-4 is on the section
+    with section(id="cart", _class="section p-4"):
         h2("Shopping Cart", _class=f"text-2xl font-bold {PUP_TEXT_BURGUNDY_CLASS} mb-4")
         
         with div(_class=f"bg-gradient-to-r from-yellow-400 to-orange-400 rounded-lg p-4 mb-6"):
@@ -324,7 +421,7 @@ def cart_content(_):
 
 # Contact Section (matches example's contact section)
 def contact_us_content(_):
-    with section(id="contact", _class="section p-4"): # Ensure p-4 is on the section
+    with section(id="contact", _class="section p-4"):
         with div(_class="text-center mb-6"):
             with div(_class=f"w-16 h-16 {TAILWIND_YELLOW_400} rounded-full flex items-center justify-center mx-auto mb-4"):
                 i(_class=f"fas fa-star {TAILWIND_RED_800} text-2xl")
@@ -347,10 +444,11 @@ def contact_us_content(_):
 
 # Profile Section (matches example's profile section)
 def profile_content(_):
-    with section(id="profile", _class="section p-4"): # Ensure p-4 is on the section
+    with section(id="profile", _class="section p-4"):
         with div(_class="text-center mb-6"):
-            with div(_class="w-20 h-20 bg-gray-300 rounded-full flex items-center justify-center mx-auto mb-4"):
-                img(src="/static/images/user_icon.png", _class="w-full h-full object-cover rounded-full")
+            with div(_class=f"w-20 h-20 {TAILWIND_GRAY_300} rounded-full flex items-center justify-center mx-auto mb-4"):
+                i(_class=f"fas fa-user text-3xl {TAILWIND_GRAY_600}") # Using font awesome icon based on image. if using img, uncomment below line
+                #img(src="/static/images/user_icon.png", _class="w-full h-full object-cover rounded-full") # If you prefer image
             h2(session.get('user_name', 'Guest'), _class=f"text-2xl font-bold {PUP_TEXT_BURGUNDY_CLASS}")
 
         with div(_class="bg-white rounded-lg shadow-lg p-6 mb-6"):
@@ -373,11 +471,12 @@ def profile_content(_):
                 a("Sign Out", href=url_for('logout'), _class=f"w-full {PUP_BURGUNDY_CLASS} text-white py-3 rounded-lg font-semibold flex items-center justify-center")
             else:
                 a("Sign In", href=url_for('login_page'), _class=f"w-full {PUP_BURGUNDY_CLASS} text-white py-3 rounded-lg font-semibold flex items-center justify-center")
-                a("Create Account", href=url_for('register_page'), _class="w-full bg-gray-200 text-gray-700 py-3 rounded-lg font-semibold flex items-center justify-center")
+                a("Create Account", href=url_for('register_page'), _class=f"w-full {TAILWIND_GRAY_200} text-gray-700 py-3 rounded-lg font-semibold flex items-center justify-center")
+
 
 # Order History Section (adapted to Tailwind)
 def order_history_content(_):
-    with section(id="order-history", _class="section p-4"): # Ensure p-4 is on the section
+    with section(id="order-history", _class="section p-4"):
         h1("Order History", _class=f"text-2xl font-bold {PUP_TEXT_BURGUNDY_CLASS} mb-4")
         
         with div(_class="bg-white rounded-lg shadow-lg p-6"):
